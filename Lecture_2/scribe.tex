@@ -46,7 +46,7 @@
 
 % \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
 
-
+\graphicspath{images/}
 
 \title{Quantum Algorithms, Spring 2022: Lecture 2 Scribe}
 
@@ -95,12 +95,12 @@ So, qubit is a unit vector. Using this, we can write  [\ref{eq:1}] as
 \begin{equation}
     \ket{\psi} = e^{i\gamma}\big(\cos{\frac{\theta}{2}}\ket{0} + e^{i\phi} \sin{\frac{\theta}{2}}\ket{0}\big)
 \end{equation}
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.4\linewidth]{bloch_sphere.png}
-\caption{Bloch sphere. \cite{bloch_sphere}}
-\label{fig:Bloch sphere}
-\end{figure}
+% \begin{figure}[h]
+% \centering
+% \includegraphics[width=0.4\linewidth]{./images/bloch_sphere.png}
+% \caption{Bloch sphere. \cite{bloch_sphere}}
+% \label{fig:Bloch sphere}
+% \end{figure}
 
 where $\theta$, $\phi$ and $\gamma$ are real. The factor of $e^{i\gamma}$, called global phase, has no observable effects and can be ignored. The qubit can be represented as a point on a three-dimensional sphere called as \textit{Bloch sphere} fig.\ref{fig:Bloch sphere}.
 
