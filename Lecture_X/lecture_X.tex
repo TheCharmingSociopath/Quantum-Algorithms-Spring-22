@@ -1,0 +1,136 @@
+\documentclass[11.5pt, paper=a4]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath, amssymb, amscd, amsthm, amsfonts, mathtools}
+\usepackage[left=2cm, right=2cm, top=1.5cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{physics}
+\usepackage{tikz}
+\usepackage{url}
+\usepackage[square,numbers]{natbib} \usepackage{tabularx}
+
+\usepackage{braket}
+\usepackage{thmtools}
+\usepackage{float}
+
+%%% Theorem Style
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\numberwithin{theorem}{section}
+
+%% Autoref prefixes
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+\renewcommand{\figureautorefname}{Figure}
+\def\theoremautorefname{Theorem}
+\def\lemmaautorefname{Lemma}
+\def\definitionautorefname{Definition}
+\def\conjectureautorefname{Conjecture}
+\def\algorithmautorefname{Algorithm}
+
+%% Writing algorithms
+
+\usepackage{algorithm} % captioning 
+\usepackage{algpseudocode}
+
+% \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
+
+
+
+\title{Quantum Algorithms, Spring 2022: Lecture X Scribe}
+
+\author{Scribes' Names}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Recap}
+
+A short recap of the previous lecture. Scribe the current lecture from the next section. Remove the instructions section.
+
+\section{Instructions}
+
+\begin{enumerate}
+\item Do not use all CAPS in titles. Replace the X with lecture number. Replace scribes' names with your names.
+
+\item Use notation used in the class. (vectors, variables, matrices, sets, etc.)
+
+\item All variables must be in math mode. That is \$ \$. 
+For example, we write  $n$-dimensional and not n-dimensional. 
+
+\item Center all tables and figures. 
+
+\item Number and label all important equations and leave out the unimportant ones. 
+
+\item You can use \begin{verbatim}
+\autoref{eq:use_suitable_name}
+\end{verbatim} to refer equations/tables/figures.
+
+\item Use \begin{verbatim}
+    \citet{example}
+\end{verbatim} to refer to the bibliography. Example: \citet{example} is an example.
+
+\item Do not use boldface to emphasize anything. Use command emph provided by latex.
+
+\item As far as possible create your own examples/figures.
+If any figure is downloaded from internet, please mention appropriate image credits.
+
+\item Do not create images from textbook and paste them. You will get zero marks.
+
+\item If you are new to latex, \href{https://en.wikibooks.org/wiki/LaTeX/Mathematics}{this hyperlink} might be useful. Overleaf has good resources too.
+
+\item Submit a zip file that contains all the required resources, including the PDF of your scribe, source, images, bibliography, etc.
+
+\item Please use sensible conventions, indentations and avoid annoying mistakes in the course file. 
+
+\end{enumerate}
+
+Example on how to use theorem, definition, lemma, etc. environments:
+
+\begin{verbatim}
+    \begin{theorem}[Theorem Name]
+    \label{thm:inappropriate_text}
+
+        Theorem text
+
+    \end{theorem}
+
+    \begin{proof}
+
+    Proof by Obviousness. Hence proved. 
+    
+    \end{proof}
+
+
+    \begin{corollary}[Corollary Name]
+    \label{cor:less_inappropriate_text}
+        Corollary text
+    \end{corollary}
+    
+    \begin{proof}
+        Proof by Lack of sufficient time. Hence proved.
+    \end{proof}
+
+\end{verbatim}
+
+You may play around to find out more.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
+
