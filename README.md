@@ -6,7 +6,7 @@ TA: Aditya Morolia (Moi!)
 
 ## Scribe Builds
 
-![Build paper](../../workflows/BuildPaper/badge.svg)
+![Build paper](../../workflows/Build Paper/badge.svg)
 
 - [Lecture 1](../../raw/build/Lecture\ 1.pdf)
 - [Lecture 2](../../raw/build/Lecture\ 2.pdf)
