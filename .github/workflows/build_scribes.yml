@@ -23,8 +23,8 @@ jobs:
       uses: xu-cheng/latex-action@master
       with:
         root_file: |
-          Lecture\ 1/scribe.tex
-          Lecture\ 2/scribe.tex
+          'Lecture\ 1'/scribe.tex
+          'Lecture\ 2'/scribe.tex
     - name: Prepare PDFS
       run: |
         mkdir build && cp *.pdf build/
