@@ -22,7 +22,7 @@ jobs:
     - name: LaTeX compilation
       uses: xu-cheng/latex-action@master
       with:
-        root_file: "Lecture_*/scribe.tex"
+        root_file: "Lecture_*/lecture_*.tex"
         glob_root_file: true
     - name: Prepare PDFS
       run: |

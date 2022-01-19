@@ -8,7 +8,7 @@ TA: Aditya Morolia (Moi!)
 
 ![Build paper](../../workflows/Build Paper/badge.svg)
 
-- [Lecture 1](../../raw/build/Lecture\ 1.pdf)
-- [Lecture 2](../../raw/build/Lecture\ 2.pdf)
+- [Lecture 1](../../raw/build/lecture_1.pdf)
+- [Lecture 2](../../raw/build/lecture_2.pdf)
 
 
