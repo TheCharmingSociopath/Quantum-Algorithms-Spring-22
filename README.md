@@ -39,3 +39,22 @@ Make a PR with your scribe sources. Follow the following structure:
 \end{document}
 
 ```
+
+
+
+## Locally building tex
+
+### Recommended packages to install
+
+`sudo pacman -S texlive-most texlive-core texlive-science texlive-latexextra texlive-bibtexextra texlive-publishers`
+
+### Edit
+
+Use favourite editor to edit.
+PS: Check out https://github.com/lervag/vimtex#requirements
+
+### To Build
+
+`latexmk -pdflatex filename.tex`
+
+
