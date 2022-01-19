@@ -21,4 +21,21 @@ Make a PR with your scribe sources. Follow the following structure:
 - Put all your images into an `images` folder inside your folder.
 - You may use the `preamble.tex` if you wish to.
 
+## Template to use the preamble
 
+```tex
+\documentclass[11.5pt, paper=a4]{article}
+
+
+\usepackage{preamble}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+%% Add appropriate bib info
+
+\end{document}
+
+```

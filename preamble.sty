@@ -1,0 +1,58 @@
+\ProvidesPackage{preamble}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath, amssymb, amscd, amsthm, amsfonts, mathtools}
+\usepackage[left=2cm, right=2cm, top=1.5cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{physics}
+\usepackage{tikz}
+\usepackage{url}
+\usepackage[square,numbers]{natbib} \usepackage{tabularx}
+
+\usepackage{braket}
+\usepackage{thmtools}
+\usepackage{float}
+
+%%% Theorem Style
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\numberwithin{theorem}{section}
+
+%% Autoref prefixes
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+\renewcommand{\figureautorefname}{Figure}
+\def\theoremautorefname{Theorem}
+\def\lemmaautorefname{Lemma}
+\def\definitionautorefname{Definition}
+\def\conjectureautorefname{Conjecture}
+\def\algorithmautorefname{Algorithm}
+
+%% Writing algorithms
+
+\usepackage{algorithm} % captioning
+\usepackage{algpseudocode}
+
+% \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
+
+
+
+\title{Quantum Algorithms, Spring 2022: Lecture X Scribe}
+
+\author{Scribes' Names}
+
+\date{\today}
+
+
