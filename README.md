@@ -1,8 +1,12 @@
 # Quantum Algorithms Spring'22, IIIT Hyderabad
 
-Course taken by Prof. Shantanav Chakraborty.
+### A team of two students taking the cource scribe each lecture for the [course](https://sites.google.com/view/shchakra/teaching/s22-quantum-algorithms). 
 
-TA: Aditya Morolia (Moi!)
+Course taught by [Prof. Shantanav Chakraborty](https://sites.google.com/view/shchakra/).
+
+TA: [Aditya Morolia (Moi!)](https://thecharmingsociopath.github.io/)
+
+#### Disclaimer: Most scribes here are a work in progress and the documents should be treated as such. These will be finished by the end of the course. 
 
 ## Scribe Builds
 
@@ -21,6 +25,8 @@ Make a PR with your scribe sources. Follow the following structure:
 - The main file should be named `lecture_X.tex`
 - Put all your images into an `images` folder inside your folder.
 - You may use the `preamble.tex` if you wish to.
+- Update README with the scribe build (just copy one of the previous lines) for your notes. It'll give you a direct download link to view and read the scribes.
+- Build scribe runs on each push. 
 
 ## Template to use the preamble
 
@@ -43,16 +49,18 @@ Make a PR with your scribe sources. Follow the following structure:
 
 
 
-## Locally building tex
+## Locally building tex (Arch)
+
+Debian instructions similar, use `apt-get` to install.  
 
 ### Recommended packages to install
 
 `sudo pacman -S texlive-most texlive-core texlive-science texlive-latexextra texlive-bibtexextra texlive-publishers`
 
-### Edit
+### Make your edits
 
-Use favourite editor to edit.
-PS: Check out https://github.com/lervag/vimtex#requirements
+Use favourite editor to scribe.
+PS: Check out https://castel.dev/post/lecture-notes-1/ (Vim is beautiful)
 
 ### To Build
 
