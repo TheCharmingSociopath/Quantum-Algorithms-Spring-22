@@ -49,7 +49,7 @@ Make a PR with your scribe sources. Follow the following structure:
 
 
 
-## Locally building tex (Arch)
+## Locally building tex documents (Arch)
 
 Debian instructions similar, use `apt-get` to install.  
 
@@ -57,7 +57,7 @@ Debian instructions similar, use `apt-get` to install.
 
 `sudo pacman -S texlive-most texlive-core texlive-science texlive-latexextra texlive-bibtexextra texlive-publishers`
 
-### Make your edits
+### Make your edits to a .tex file 
 
 Use favourite editor to scribe.
 PS: Check out https://castel.dev/post/lecture-notes-1/ (Vim is beautiful)
