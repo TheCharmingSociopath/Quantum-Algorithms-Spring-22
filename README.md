@@ -6,7 +6,7 @@ TA: Aditya Morolia (Moi!)
 
 ## Scribe Builds
 
-![Build](../../workflows/Build Scribes/badge.svg)
+![Build](../../workflows/Build%20Scribes/badge.svg)
 
 - [Template](../../raw/build/lecture_X.pdf)
 - [Lecture 1](../../raw/build/lecture_1.pdf)
