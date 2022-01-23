@@ -41,7 +41,7 @@
 
 %% Writing algorithms
 
-\usepackage{algorithm} % captioning 
+\usepackage{algorithm} % captioning
 \usepackage{algpseudocode}
 
 % \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
@@ -67,7 +67,7 @@ Given Hilbert space $\mathbf{H}$ corresponding to the state space of the system,
 \subsection{Evolution}
 Evolution of a closed quantum system is given by a unitary transformation. In its physical interpretation we have this postulate governed by the Schrodinger Equation, as stated below.
 $$
-i{\hslash}\frac{d\vert\psi\rangle}{\dt} = H\vert\psi\rangle
+i{\hslash}\frac{d\vert\psi\rangle}{dt} = H\vert\psi\rangle
 $$
 The above leads to $\ket{\psi(t)} = e^{-iHt}\ket{\psi(0)}$, given that the Hamiltonian itself is not dependent on time. The Hamiltonian is a self-adjoint operator and has a spectral decomposition, $H = \sum E\vert E\rangle\langle E\vert$. Furthermore, here $e^{-iHt}$ serves as the unitary transformation over time $t$ on $\ket{\psi(0)}$.\newline
 
@@ -78,12 +78,12 @@ To ensure that the evolution maintains the state vector to be a unit vector, the
 \begin{align*}
     \ket{\psi_1'} = U \ket{\psi_1} \\
     \ket{\psi_2'} = U \ket{\psi_2} \\
-    \bra{\psi_1'}\ket{\psi_2'} = \bra{\psi_1}U^\dag U \ket{\psi_2} \\ 
+    \bra{\psi_1'}\ket{\psi_2'} = \bra{\psi_1}U^\dag U \ket{\psi_2} \\
     \bra{\psi_1'}\ket{\psi_2'} = \bra{\psi_1} I \ket{\psi_2} \\
     \bra{\psi_1'}\ket{\psi_2'} = \bra{\psi_1} \ket{\psi_2} \\
 \end{align*}
 Trace preserving operators also convert a mutually orthonormal set of vectors to another mutually orthonormal set of vectors.
- 
+
 \subsection{Composition}
 The state space of a composite physical system is the tensor product of the state spaces of the component systems.
 $$
@@ -127,7 +127,7 @@ In classical computers, we often perform irreversible computations involving gat
 On the other hand, reversible computing doesn't lead to any heat dissipation. Quantum computing is inherently reversible since every computation is represented by unitary gates which are reversible by definition.
 
 \subsection{Universal Gates}
-All possible boolean functions can be constructed using circuits made with a single gate. These gates are called universal gates. An example in the classical circuits domain would be NAND gate. 
+All possible boolean functions can be constructed using circuits made with a single gate. These gates are called universal gates. An example in the classical circuits domain would be NAND gate.
 
 Given that quantum circuits must be reversible, the individual components, i.e. the gates must be reversible in nature too. Which leads us to a proven universal gate in quantum circuits.
 
