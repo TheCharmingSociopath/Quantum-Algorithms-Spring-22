@@ -41,7 +41,7 @@
 
 %% Writing algorithms
 
-\usepackage{algorithm} % captioning 
+\usepackage{algorithm} % captioning
 \usepackage{algpseudocode}
 
 % \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
@@ -85,11 +85,11 @@
 \subsection{Fredkin Gate}
     \begin{itemize}
         \item Output of remaining two bits depends on control bit.
-        \item Truth table (C is control bit) - 
+        \item Truth table (C is control bit) -
             \begin{center}
-            \begin{tabular}{ |c|c|c|c|c|c| } 
+            \begin{tabular}{ |c|c|c|c|c|c| }
             \hline
-            C & A & B & C & A' & B'\\ 
+            C & A & B & C & A' & B'\\
             \hline
             0 & 0 & 0 & 0 & 0 & 0\\
             0 & 0 & 1 & 0 & 0 & 1\\
@@ -108,11 +108,11 @@
     \begin{itemize}
         \item 2 bit input and 2 bit output (Control bit and Target bit).
         \item If C is 0 then T is not flipped. If C is 1 then T is flipped.
-        \item Truth table (C is control bit and T is Target bit) - 
+        \item Truth table (C is control bit and T is Target bit) -
             \begin{center}
-            \begin{tabular}{ |c|c|c|c|c|c| } 
+            \begin{tabular}{ |c|c|c|c|c|c| }
             \hline
-            C & T & C & T'\\ 
+            C & T & C & T'\\
             \hline
             0 & 0 & 0 & 0\\
             0 & 1 & 0 & 1\\
@@ -131,11 +131,11 @@
 \begin{itemize}
         \item 3 bit input and 3 bit output (2 Control bits and a Target bit).
         \item T is flipped only when both control bits are 1.
-        \item Truth table (C is control bit and T is target bit) - 
+        \item Truth table (C is control bit and T is target bit) -
             \begin{center}
-            \begin{tabular}{ |c|c|c|c|c|c| } 
+            \begin{tabular}{ |c|c|c|c|c|c| }
             \hline
-            $C_1$ & $C_2$ & T & $C_1$ & $C_2$ & T'\\ 
+            $C_1$ & $C_2$ & T & $C_1$ & $C_2$ & T'\\
             \hline
             0 & 0 & 0 & 0 & 0 & 0\\
             0 & 0 & 1 & 0 & 0 & 1\\
@@ -184,12 +184,12 @@ In the circuit model of quantum computing, quantum gates are unitary operators o
     1 & 0
     \end{pmatrix}$
     \begin{figure}[h]
-        \includegraphics[scale=0.15]{images/download.png}
+        \includegraphics[scale=0.15]{download.png}
     \end{figure}
     $\begin{matrix}
     X\ket{0} = \ket{1}\\
     X\ket{1} = \ket{0}
-    \end{matrix}$ \\ 
+    \end{matrix}$ \\
     $Y = \sigma_{X} = \begin{pmatrix}
     0 & -i\\
     i & 0
@@ -198,7 +198,7 @@ In the circuit model of quantum computing, quantum gates are unitary operators o
     Y\ket{1} = -i\ket{0}
     \end{matrix}$
     \begin{figure}[h]
-        \includegraphics[scale=0.2]{images/Y gate.png}
+        \includegraphics[scale=0.2]{Y gate.png}
     \end{figure} \\
     $Z = \sigma_{X} = \begin{pmatrix}
     1 & 0\\
@@ -206,10 +206,10 @@ In the circuit model of quantum computing, quantum gates are unitary operators o
     \end{pmatrix}$ $\begin{matrix}
     Z\ket{0} = \ket{0}\\
     Z\ket{1} = -\ket{1}
-    \end{matrix}$ 
+    \end{matrix}$
     \begin{figure}[h]
-        \includegraphics[scale=0.2]{images/Z gate.png}
-    \end{figure} 
+        \includegraphics[scale=0.2]{Z gate.png}
+    \end{figure}
     \begin{itemize}
         \item $ X^{2} = Y^{2} = Z^{2} = 1 $
     \end{itemize}
@@ -220,14 +220,14 @@ In the circuit model of quantum computing, quantum gates are unitary operators o
     \end{pmatrix}$ $\begin{matrix}
     H\ket{0} = \frac{1}{\sqrt{2}}(\ket{0} + \ket{1})\\
     H\ket{1} = \frac{1}{\sqrt{2}}(\ket{0} - \ket{1})\\
-    \end{matrix}$ 
+    \end{matrix}$
 \subsubsection{Phase gate}
     $R_{\phi} = \begin{pmatrix}
     1 & 0\\
     0 & e^{i\phi}
     \end{pmatrix}$ $\begin{matrix}
     R_{\phi}\ket{0} = \ket{0} \\
-    R_{\phi}\ket{1} = e^{i\phi}\ket{1} 
+    R_{\phi}\ket{1} = e^{i\phi}\ket{1}
     \end{matrix}$ \\
     $R_{\pi\4} = T\ gate = \begin{pmatrix}
     1 & 0\\
@@ -243,20 +243,20 @@ In the circuit model of quantum computing, quantum gates are unitary operators o
         $R_{X}(\theta) = e^{-iX\theta} = cos(\theta)1 - i sin(\theta) X$ \\
         $R_{Y}(\theta) = e^{-iY\theta} = cos(\theta)1 - i sin(\theta) Y$\\
         $R_{Z}(\theta) = e^{-iZ\theta} = cos(\theta)1 - i sin(\theta) Z$ \\
-    \newpage    
-    
+    \newpage
+
     \item Suppose $\hat{n}$ is a unit vector: $(n_{x}, n_{y}, n_{z})$.   $\hat{\sigma} = (\sigma_{X}, \sigma_{Y}, \sigma_{Z})$\\
     $R_{\hat{n}}(\theta) = e^{-i\hat{n}\hat{\sigma}\theta} = = cos(\theta)1 - i sin(\theta) \hat{n} \hat{\sigma} = cos(\theta)1 - i sin(\theta)(n_{X}\sigma_{X} + n_{y}\sigma_{Y} + n_{Z}\sigma_{Z})$
 
     \item $U = e^{i\phi}R_{X}(\alpha)R_{Y}(\beta)R_{Z}(\gamma)$
-    
+
     \item
         \begin{itemize}
             \item Tensor Products: \\
                 If gates are applied to different parts of the register.
                 \begin{figure}[h]
                     \centering
-                    \includegraphics[scale=0.2]{images/Tensor Product.png}
+                    \includegraphics[scale=0.2]{Tensor Product.png}
                 \end{figure}\\
                 $\ket{\phi} = (U_{1}\otimes U_{2}...\otimes U_{n})\ket{0..0}$\\
                 If $\forall j, U_{j}=U$\\
@@ -265,17 +265,17 @@ In the circuit model of quantum computing, quantum gates are unitary operators o
                 If gates are applied sequentially to the same register.
                 \begin{figure}[h]
                     \centering
-                    \includegraphics[scale=0.2]{images/Tensor Product2.png}
+                    \includegraphics[scale=0.2]{Tensor Product2.png}
                 \end{figure}\\
                 $\ket{\phi}=U_{n} U_{n-1} ... U_{1}\ket{0}$
         \end{itemize}
-        
-    \item Typically a quantum circuit requires both 
+
+    \item Typically a quantum circuit requires both
         \begin{figure}[h]
                     \centering
-                    \includegraphics[scale=0.4]{images/Tensor Product3.png}
+                    \includegraphics[scale=0.4]{Tensor Product3.png}
                 \end{figure}\\
-    
+
 \end{itemize}
 \subsubsection{Hadamard gate}
     $H\ket{0} = \frac{1}{\sqrt{2}}(\ket{0} + \ket{1}) = \ket{+}$\\
@@ -324,27 +324,27 @@ $ \hat{U} = \begin{pmatrix}
 \end{pmatrix} $
 \begin{figure}[h]
     \centering
-    \includegraphics[scale=0.5]{images/CNOT gate.png}
+    \includegraphics[scale=0.5]{CNOT gate.png}
 \end{figure}\\
 $\ket{00} \longmapsto^{\hat{H} \otimes 1} (\frac{\ket{0} + \ket{1}}{\sqrt{2}})\ket{0}  \longmapsto^{CNOT} \frac{\ket{00}+\ket{11}}{\sqrt{2}} = \ket{\Phi^{dagger}}$ \\
 \newpage
 \textbf{Controlled Operations are entangling}
 \begin{figure}[h]
     \centering
-    \includegraphics[scale=0.4]{images/entangling.png}
+    \includegraphics[scale=0.4]{entangling.png}
 \end{figure}\\
 \subsubsection{SWAP gate}
 \begin{itemize}
     \item $S\ket{a,b} = \ket{b,a}$ \\
         \begin{figure}[h]
             \centering
-            \includegraphics[scale=0.2]{images/SWAP 3.png}
+            \includegraphics[scale=0.2]{SWAP 3.png}
         \end{figure}\\
         $\ket{a,b} \longmapsto^{CNOT_{a,2}} \ket{a, a,\oplus b} \longmapsto^{CNOT_{2,1}} \ket{a\oplus(a\oplus), a \oplus b} = \ket{b, a \oplus b}$ \\
         $ \ket{b, a \oplus b} \longmapsto^{CNOT_{1,2}} \ket{b, (a\oplusb)\oplusb} = \ket{b, a}$ \\
          \begin{figure}[h]
             \centering
-            \includegraphics[scale=0.2]{images/SWAP 1.png}
+            \includegraphics[scale=0.2]{SWAP 1.png}
         \end{figure}\\
 \end{itemize}
 
