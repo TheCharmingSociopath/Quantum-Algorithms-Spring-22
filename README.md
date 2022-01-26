@@ -16,6 +16,7 @@ TA: [Aditya Morolia (Moi!)](https://thecharmingsociopath.github.io/)
 - [Lecture 1](../../raw/build/lecture_1.pdf)
 - [Lecture 2](../../raw/build/lecture_2.pdf)
 - [Lecture 3](../../raw/build/lecture_3.pdf)
+- [Lecture 4](../../raw/build/lecture_4.pdf)
 
 ## Instructions for students
 
