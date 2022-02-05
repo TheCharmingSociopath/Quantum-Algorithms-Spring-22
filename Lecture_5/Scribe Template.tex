@@ -1,0 +1,172 @@
+\documentclass[11.5pt, paper=a4]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath, amssymb, amscd, amsthm, amsfonts, mathtools}
+\usepackage[left=2cm, right=2cm, top=1.5cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{physics}
+\usepackage{tikz}
+\usepackage{url}
+\usepackage[square,numbers]{natbib} \usepackage{tabularx}
+
+\usepackage{braket}
+\usepackage{thmtools}
+\usepackage{float}
+
+%%% Theorem Style
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\numberwithin{theorem}{section}
+
+%% Autoref prefixes
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+\renewcommand{\figureautorefname}{Figure}
+\def\theoremautorefname{Theorem}
+\def\lemmaautorefname{Lemma}
+\def\definitionautorefname{Definition}
+\def\conjectureautorefname{Conjecture}
+\def\algorithmautorefname{Algorithm}
+
+%% Writing algorithms
+
+\usepackage{algorithm} % captioning 
+\usepackage{algpseudocode}
+\usepackage{multirow}
+\input{Qcircuit}
+
+% \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
+
+
+
+\title{Quantum Algorithms, Spring 2022: Lecture 5 Scribe}
+
+\author{Praguna Manvi, Samay Kathari}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Recap}
+
+\begin{itemize}
+    \item Reversible circuits produce unwanted garbage bits that are dependent on the input and are entangle with the desired out bits, so we need : \textbf{Uncomputing!}
+    \begin{equation*}
+        \Qcircuit @C=1em @R=.7em {
+            & \lstick{\ket{x}} & \multigate{1}{C_f} & \qw & \rstick{\ket{x}} \\
+            & \lstick{\ket{y}} & \ghost{C_f} & \qw & \rstick{\ket{y \bigoplus f(x)}} \\
+        }
+    \end{equation*}
+    \item Quantum Circuits
+    \begin{itemize}
+        \item Single Qubit Gates: $X, Y, Z, R_\phi, h, \ldots$
+        \item Two Qubit Gates: CNOT, any $C-U$ where U is a single qubit gate.
+        \begin{equation*}
+            \Qcircuit @C=1em @R=.7em {
+            & \lstick{\ket{c}} & \ctrl{1} & \qw & \rstick{\ket{e}} \\
+            & \lstick{\ket{t}} & \gate{U} & \qw & \rstick{U^c\ket{t}} \\
+        }
+        \end{equation*}
+        \begin{equation*} 
+            \equiv
+            \begin{pmatrix}
+                1 & 0 & 1 & 0\\
+                0 & 1 & 0 & 1\\
+                0 & 0 & \multicolumn{2}{c}{\multirow{2}{*}{U}}\\
+                0 & 0 &
+            \end{pmatrix}
+        \end{equation*}
+        $\forall$ U is any single qubit gate.
+    \end{itemize}
+\end{itemize}
+
+\section{Universality of Quantum circuits}
+
+I will provide you some statements regarding the universality of quantum circuits without necessarily proving them.
+\begin{itemize}
+    \item \textbf{Statement 1:} \{CNOT, all single qubit gates\} : universal for Quantum Computing
+    \item \textbf{Statement 2:} The set of \{ CNOT, $H$, $R_{\pi/4}\}$ : universal for Quantum Computing \\
+    \textit{Any other quantum circuit can be well approximated using quantum circuits of only these gates.}
+\end{itemize}
+\subsection{Formalizing Statement 2}
+    Let $G=\{CNOT, H, R_{\pi/4}\}$, then for any quantum circuit $U$, $\in$ a number $t$, such that
+    \begin{equation*}
+        \lvert\lvert U - U_t U_{t-1} \ldots U_1 \rvert\rvert \leq \epsilon, where
+    \end{equation*}
+    \begin{center}
+        each $U_j \in G$ \\ $\lvert \lvert \quad \rvert \rvert:$ spectral norm \\ $\lvert \lvert A \rvert \rvert = max_{\bra{\psi}\ket{\psi}=1} \lvert \lvert A\ket{\psi} \rvert \rvert$
+    \end{center}
+    \begin{itemize}
+        \item How large should 't' be? Clearly, it better not be too large.
+        \item Luckily 't' isn't too large owing to crucial result by Solvay and Kitaev
+    \end{itemize}
+\section{Solovay Ketanov Theorem}
+\begin{itemize}
+    \item Any 't'-gate quantum circuit can be $\epsilon$ approximated using only $\mathcal{O}(t$ polylog$ (\frac{1}{\epsilon}))$ gates from G.
+    \item \textbf{Proof:} Appendix of Neilsen and Chuang \cite{nielsen2002quantum}
+    \item There are also other universal gate sets: some are efficient than others.
+\end{itemize}
+
+\section{Quantum Parallelism}
+
+\begin{itemize}
+    \item Suppose we are interested in some function $f:\{0,1\}^n\xrightarrow{}\{0,1\}$
+    \begin{equation*}
+        \Qcircuit @C=1em @R=.7em {
+            & \lstick{\ket{x}} & \multigate{1}{U_f} & \qw & \rstick{\ket{x}} \\
+            & \lstick{\ket{y}} & \ghost{U_f} & \qw & \rstick{\ket{y \bigoplus f(x)}} \\
+        }
+    \end{equation*}
+    So, if $f(x)=0$, \quad $\ket{x}\ket{y}\xrightarrow{U_f}\ket{x}\ket{y}$ \\
+    and if $f(x)=1$, \quad $\ket{x}\ket{y}\xrightarrow{U_f}\ket{x}\ket{\Bar{y}}$ \\
+    \begin{equation*}
+        \Qcircuit @C=1em @R=.7em {
+            \lstick{\ket{0}} &\qw & \gate{H} & \multigate{3}{U_f} & \qw & \qw & \meter\\
+            \lstick{\vdots} & \qw & \qw & \ghost{U_f} & \qw & \qw & \meter\\
+            \lstick{\ket{0}} &\qw & \gate{H} & \ghost{U_f} & \qw & \qw & \meter \\
+            \lstick{\ket{0}} &\qw & \qw & \ghost{U_f} & \qw & \qw
+        }
+    \end{equation*}
+    \begin{equation*}
+        \ket{0}^{\bigotimes n}\ket{0} \xrightarrow{H^{\bigotimes n}\mathbb{1}}\frac{1}{\sqrt{2^n}}\sum_{x\in\{0,1\}^n}\ket{x}\ket{0}\xrightarrow{U_f}\frac{1}{\sqrt{2^n}}\sum_{x\in\{0,1\}^n}\ket{x}\ket{f(x)}
+    \end{equation*}
+    \item By applying $U_f$ only once, we are able to obtain a quantum state that contains in it all $2^n$ possible values of $f(x)$ in superposition!
+    \item This in itself is not very useful. If we make projective measurement, we will observe some $\ket{z}\ket{f(z)}$ with probability $1/2^n$.
+    \item Quantum parallelism is not enough to demonstrate the power of quantum computing.
+    \item Quantum parallelism needs to be combined with interference, entanglement, to something better than classical computing. 
+\end{itemize}
+
+\section{Measurement}
+
+A short recap of the previous lecture. Scribe the current lecture from the next section. Remove the instructions section.
+
+\section{Quantum Oracle}
+
+A short recap of the previous lecture. Scribe the current lecture from the next section. Remove the instructions section.
+
+\section{Deutsch Algorithm}
+
+A short recap of the previous lecture. Scribe the current lecture from the next section. Remove the instructions section.
+
+\section{Physics Understanding of the Deutsch Problem}
+
+A short recap of the previous lecture. Scribe the current lecture from the next section. Remove the instructions section.
+
+\nocite{*}
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
