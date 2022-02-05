@@ -149,21 +149,95 @@ I will provide you some statements regarding the universality of quantum circuit
     \item Quantum parallelism needs to be combined with interference, entanglement, to something better than classical computing. 
 \end{itemize}
 
-\section{Measurement}
 
-A short recap of the previous lecture. Scribe the current lecture from the next section. Remove the instructions section.
 
-\section{Quantum Oracle}
-
-A short recap of the previous lecture. Scribe the current lecture from the next section. Remove the instructions section.
+\section{Quantum Oracle : Phase Kickback Oracle}
+\begin{itemize}
+    \item From the above sections we know that for some function : 
+    $f : \{0, 1\}^n \xrightarrow{}\{0,1\}$ and \\ 
+    \begin{equation*}
+            \Qcircuit @C=1em @R=.7em {
+                & \lstick{\ket{x}} & \multigate{1}{U_f} & \qw & \rstick{\ket{x}} \\
+                & \lstick{\ket{y}} & \ghost{U_f} & \qw & \rstick{\ket{y \bigoplus f(x)}} \\
+            }
+    \end{equation*}
+    \begin{equation*}
+        \text{if\quad} f(x)=0, \text{\quad} \ket{x}\ket{y}\xrightarrow{U_f}\ket{x}\ket{y}
+    \end{equation*}
+    \begin{equation*}
+        \text{and if\quad} f(x)=1, \text{\quad} \ket{x}\ket{y}\xrightarrow{U_f}\ket{x}\ket{\Bar{y}}
+    \end{equation*}
+    If we substitute $\ket{-}$ for $y$ we get :
+        \begin{equation*}
+        \text{if\quad} f(x)=0, \text{\quad} \ket{x}[\frac{\ket{0} - \ket{1}}{\sqrt{2}}]\xrightarrow{U_f}\ket{x}[\frac{\ket{0} - \ket{1}}{\sqrt{2}}]
+    \end{equation*}
+    \begin{equation*}
+        \text{and if\quad} f(x)=1, \text{\quad} \ket{x}[\frac{\ket{0} - \ket{1}}{\sqrt{2}}]\xrightarrow{U_f}-\ket{x}[\frac{\ket{0} - \ket{1}}{\sqrt{2}}]
+    \end{equation*}
+\item The phase get changed when $f(x) = 1$ (a kickback), hence we call this a phase kick back oracle with whose result we can guess $f(x)$ !
+This can be rewritten as :
+\begin{equation*}
+    \ket{x}\ket{-} \xrightarrow{U_f} (-1)^{f(x)}\ket{x}\ket{-}
+\end{equation*}
+Rewriting the circuit for $y = \ket{-}$:
+\begin{equation*}
+     \Qcircuit @C=1em @R=.7em {
+                & \lstick{\ket{x}} & \multigate{1}{U_f} & \qw & \qw & \rstick{(-1)^{f(x)}\ket{x}} \\
+                \lstick{\ket{1}} & \gate{H} & \ghost{U_f} & \qw & \qw & \rstick{\ket{-}} \\
+        }
+\end{equation*}
+The second input and output lines can be dropped as they remain the same in another frequently used representation :
+\begin{equation*}
+     \Qcircuit @C=1em @R=.7em {
+                & \lstick{\ket{x}} & \gate{U_f^{\pm}} & \qw & \qw & \rstick{(-1)^{f(x)}\ket{x}}\\
+        }
+\end{equation*}
+\begin{equation*}
+    \ket{x} \xrightarrow{U_f^{\pm}} (-1)^{f(x)}\ket{x}
+\end{equation*}
+On passing $H^{\bigotimes n}\ket{0^{\bigotimes n}}$ into the phase kickback $U_f^{\pm}$ we get :
+\begin{equation*}
+    H^{\bigotimes n}\ket{0^{\bigotimes n}} 
+    \xrightarrow{U_f^{\pm}} \frac{1}{\sqrt{2^n}} \sum_{x\in\{0,1\}^n} \ket{x}
+    \xrightarrow{U_f^{\pm}} \frac{1}{\sqrt{2^n}} \sum_{x\in\{0,1\}^n} (-1)^{f(x)}\ket{x}
+\end{equation*}
+The important thing to note here is that after passing through the oracle the amplitudes of the states have the information of $f(x)$
+\end{itemize}
 
 \section{Deutsch Algorithm}
-
-A short recap of the previous lecture. Scribe the current lecture from the next section. Remove the instructions section.
+Given a $U_f$ for some boolean function $f : \{0, 1\} \xrightarrow{} \{0, 1\}$ with the promise that either : $f(0) = f(1)$ or $f(0) \neq
+f(1) $, the task is to find the number of queries to $U_f$ to determine which is the case.
+\begin{itemize}
+  \item Classical Algorithm requires 2 queries by comparing outputs of inputs 0 and 1.
+  \item Quantum Algorithm requires only 1 query! with the design :
+    \begin{equation*}
+            \Qcircuit @C=1em @R=.7em {
+              \lstick{\ket{0}} & \gate{H} & \gate{U_f^{\pm}} & \gate{H} & \meter
+            }
+    \end{equation*}
+\begin{equation*}
+    H\ket{0} = \frac{1}{\sqrt{2}}({\ket{0} + \ket{1}}) \xrightarrow{U_f^{\pm}}\ \frac{1}{\sqrt{2}}({-1^{f(0)}\ket{0} + -1^{f(1)}\ket{1}})\xrightarrow{H}\frac{(-1^{f(0)} + -1^{f(1)})\ket{0} + (-1^{f(0)} - 1^{f(1)})\ket{1}}{2}
+\end{equation*}
+we observe : 
+\begin{equation*}
+    \ket{0} \text{\:if\:} f(0) = f(1), and\:
+    \ket{1} \text{\:for\:} f(0) \neq f(1)
+\end{equation*}
+Therefore, only one query with input $\ket{0}$ is needed.
+\end{itemize}
 
 \section{Physics Understanding of the Deutsch Problem}
 
-A short recap of the previous lecture. Scribe the current lecture from the next section. Remove the instructions section.
+The physical setup of the Deutsch Algorithm is realised using Mach Zehnder Interferometer which consists of a beam splitter that creates an equal superposition of $\ket{0}$ and $\ket{1}$. The phase shifter adds a phase of $0$ or $\pi$ which passes through another beam splitter (acting as final $H$ gate in Deutsch Algorithm) where final state are recorded. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{mz.png}\\
+    \caption{mach zehnder interferometer [2]}
+    \label{fig : mach zehnder interferometer}
+\end{figure}
+
+
 
 \nocite{*}
 \bibliographystyle{plainnat}
