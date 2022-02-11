@@ -1,0 +1,271 @@
+\documentclass[11.5pt, paper=a4]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath, amssymb, amscd, amsthm, amsfonts, mathtools}
+\usepackage[left=2cm, right=2cm, top=1.5cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{physics}
+\usepackage{tikz}
+\usepackage{url}
+\usepackage[square,numbers]{natbib} \usepackage{tabularx}
+\usetikzlibrary{quantikz}
+
+\usepackage{braket}
+\usepackage{thmtools}
+\usepackage{float}
+
+%%% Theorem Style
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\numberwithin{theorem}{section}
+
+%% Autoref prefixes
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+\renewcommand{\figureautorefname}{Figure}
+\def\theoremautorefname{Theorem}
+\def\lemmaautorefname{Lemma}
+\def\definitionautorefname{Definition}
+\def\conjectureautorefname{Conjecture}
+\def\algorithmautorefname{Algorithm}
+
+%% Writing algorithms
+
+\usepackage{algorithm} % captioning 
+\usepackage{algpseudocode}
+\usepackage{braket}
+\usepackage{physics}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+% \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
+
+
+
+\title{Quantum Algorithms, Spring 2022: Lecture 7 Scribe}
+
+\author{Hrishi Narayanan and Sabyasachi Mukhopadhyay}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Recap}
+
+\subsection{Deustch-Josza Algorithm}
+\textbf{Problem Statement}: Given a black-box $u_f$ for  $f:\{0,1\}^n\rightarrow \{0,1\}$, with the promise that f is either constant or balanced. How many queries we need to make to $u_f$ to determine which is the case?\\[2mm]
+\textbf{Classical Deterministic}: $2^n/2+1$ is the worst case \\[2mm]
+\textbf{Classical Probabilistic}: $O(log (\frac{1}{\varepsilon}))$, for the success probability $\geqslant 1-\varepsilon$ \\[2mm]
+\begin{center}
+\begin{quantikz}
+\lstick{$\ket x$} & \gate[wires=2][2cm]{U_f} & \qw 
+\rstick{$\ket x$} \\
+\lstick{$\ket y$} & & \qw \rstick{$\ket{y\oplus f(x)}$}
+\end{quantikz}
+\end{center}
+\textbf{Quantum}: 1 query \\[2mm]
+\textbf{Summary}: A function is given to a black-box, Quantum Algorithm needs 1 query, randomized Classical Algorithm needs a reasonable amount of time. Deustch-Josza is in the class BPP, wrt the deterministic classical algorithm we achieve exponential speedups but not wrt the randomized Classical Algorithm.
+
+\subsection{Bernstein-Vazirani Algorithm}
+\textbf{Problem Statement}: Given a black-box $u_f \text{ for } f:\{0,1\}^n\rightarrow \{0,1\}$, with $f=s \cdot x \mod 2$ and $x$ is the inputs, such that $s$ is unknown, $s$ being a $n$-bit string. How many queries do we need to make to $u_f$ to determine $s$?\\[2mm]
+\textbf{Classical}: $C_f$ is queried $n$ times with inputs $(1\ldots0,01\ldots0,\ldots,0\ldots1)$ to obtain $s_1,s_2,\ldots,s_n$ respectively. So classically it taken $n$ queries to determine a $n$-bit string $s$.\\[2mm]
+\textbf{Quantum}: In contrast to the classical solution which needs at least $n$-queries of the function to find $s$, only one query is needed using quantum computing. The quantum algorithm is as follows.
+\begin{equation}
+\ket 0^{\otimes n}\xrightarrow{H^{\otimes n}}\frac{1}{\sqrt{2^n}}\sum_{x\in\{0,1\}^n}\ket x\xrightarrow{U_f^{\pm}}\frac{1}{\sqrt{2^n}}\sum_{x\in\{0,1\}^n}(-1)^{f(x)}\ket{x} \xrightarrow{H^{\otimes n}} \frac{1}{\sqrt{2^n}}\sum_{x\in\{0,1\}^n}(-1)^{f(x) + x\cdot y}\ket{y} = \ket{s}
+\end{equation}
+
+\section{Basic differences between Classical and Quantum Algorithms}
+While we are not yet able to show that $\text{BPP} \neq \text{BQP}$ there are three approaches that we can pursue to study the differences between the capabilities of classical and quantum algorithms.
+\begin{itemize}
+\item \textbf{Non-exponential speedup}: We can find quantum algorithms that are demonstrably faster than the best classical algorithm but not exponentially faster. These algorithms shed no light on the conventional classification of complexity but they do demonstrate a type of separation between tasks that classical and quantum computers can perform Example: Grover's quantum speedup of the search of an unsorted data base
+\item \textbf{"Relativized" exponential speedup}: We can consider the problem of analysing the contents of a “quantum black box”. The box performs a priory unknown) unitary transformation. We can prepare an input for the box and measure its output; our task is to find out what the box does. It is possible to prove these Quantum Black boxes aka Oracles exist with this property: By feeding quantum superpositions to the box, we can learn what is inside with an exponential speedup, compared to how long it will take if we were allowed only classical inputs. A computer scientist could say $\text{BPP} \neq \text{BQP}$ "relative to the oracle", example: simon's exponential quantum speedup for finding the period of a 2 to 1 function. 
+\item \textbf{Exponential speedup for apparently hard problems}: We can exhibit a quantum algorithm that solves a problem in polynomial time , where the problem appears to hard classically, so it is strongly suspected(though not proved) that the problem is not in BPP. Example Shor's factoring algorithm. 
+\end{itemize} 
+\section{Bernstein-Vazirani Quantum Algorithm (elaboration)}
+The circuit for Bernstein-Vazirani Quantum algorithm is exactly same as that of the Deustch-Josza Algorithm.
+\begin{center}
+\begin{quantikz}
+\lstick[wires=4]{$n$} & \lstick{$\ket 0$} & \gate[wires=4][2cm]{H^{\otimes n}} & \gate[wires=4][4cm]{U_f^{\pm}} & \gate[wires=4][2cm]{H^{\otimes n}} & \meter{} & \cw \\
+ & \lstick{.} & & & & \meter{} & \cw \\
+ & \lstick{.} & & & & \meter{} & \cw \\
+ & \lstick{$\ket 0$} & & & & \meter{} & \cw
+\end{quantikz}
+\end{center}
+\subsection{The Algorithm}
+\begin{enumerate}
+  \item Perform a Hadamard gate operation on the n-qubit input state.
+  \item Pass the output of the Hadamard to a phase-kickback oracle $u_f^{+_-}$.
+  \item Perform a Hadamard gate operation on the output.
+  \item Do a measurement.
+\end{enumerate}
+
+\subsection{Analysis}
+\begin{equation}
+H^{\otimes n} \ket{0}^{\otimes n} = \frac{1}{\sqrt{{2^n}}} \sum\limits_{x\in (0,1)^n}\ket{x}\xrightarrow{u_f^{+_-}} \frac{1}{\sqrt{{2^n}}} \sum\limits_{x\in (0,1)^n} (-1)^{f(x)} \ket{x} 
+\end{equation}
+\begin{equation}
+= \frac{1}{\sqrt{{2^n}}} \sum\limits_{x\in (0,1)^n} (-1)^{s\cdot x\mod 2} \ket{x}  \\[2mm] =  \frac{1}{\sqrt{{2^n}}} \sum\limits_{x\in (0,1)^n} (-1)^{s\cdot x} \ket{x} = H^{\otimes n} \ket{s}
+\end{equation}
+\begin{equation}
+   \frac{1}{\sqrt{{2^n}}} \sum\limits_{x\in (0,1)^n} (-1)^{s\cdot x\mod 2} \ket{x}=  \frac{1}{\sqrt{{2^n}}} \sum\limits_{x\in (0,1)^n} (-1)^{s\cdot x} \ket{x} 
+\end{equation}
+as keeping or removing $\mod 2$ won't make a difference because $(-1)^{s\cdot x \mod 2} = (-1)^{s\cdot x}$ as, if ${s\cdot x}$ is odd $(-1)^{s\cdot x \mod 2}$ will give $-1$ and if ${s\cdot x}$ is even, ${s\cdot x \mod 2} = 0$ so $(-1)^{s\cdot x \mod 2}$ will give $1$, so effectively $(-1)^{s\cdot x \mod 2} \approx (-1)^{s\cdot x}$ \\[2mm]
+\begin{equation}
+  \frac{1}{\sqrt{{2^n}}} \sum\limits_{x\in (0,1)^n} (-1)^{s\cdot x} \ket{x} = H^{\otimes n} \ket{s}  
+\end{equation}
+\begin{equation}
+    \text{as } H^{\otimes n} \ket{x} = \frac{1}{\sqrt{{2^n}}} \sum\limits_{z\in (0,1)^n} (-1)^{x\cdot z} \ket{z}
+\end{equation}
+As the Hadamard gate H is represented by $H = \frac{1}{\sqrt{{2}}}
+\begin{pmatrix}
+1 & 1\\
+1 & -1
+\end{pmatrix}$ we know that Hadamard gate is Hermetian i.e $H^\dagger = H$, we also know that for any unitary matrix $uu^\dagger = \mathbb{I}$ , hence $u^\dagger = u^{-1}$, since Hadamard is an unitary operation $H= H^\dagger = H^{-1}$ or $H^2 = \mathbb{I}$ (identity matrix). So $H^{\otimes n} H^{\otimes n} =
+ (H\otimes H\otimes H\otimes...)(H\otimes H\otimes H\otimes...) = H^2\otimes H^2\otimes... = \mathbb{I}$, giving $H^{\otimes n} H^{\otimes n} = \mathbb{I}$. \\[2mm]
+As per the step $3$, when we perform a Hadamard operation on the output we get $H^{\otimes n}(H^{\otimes n}\ket{s}) = (H^{\otimes n} H^{\otimes n}) \ket{s} = \ket{s}$, we know $H^{\otimes n} H^{\otimes n} = \mathbb{I}$, so $H^{\otimes n}(H^{\otimes n}\ket{s}) = \ket{s}$.\\[2mm]
+So, when we measure at step $4$, we get $\ket{s}$, with constant probability $=1$. Number of queries to $u_f^{\pm} = 1$, we see a polynomial separation, i.e $n$ separation in query complexity, since the classical algorithm taken $n$ queries. This is unlike the Deusth-Jozsa case where the exponential separation is lost when compared to the classical randomized algorithm.\\ [2 mm]
+Bernstein and Vazirani also defined a recursive version of this problem, which can be solved exactly by a quantum algorithm in $\text{poly}($n$)$ steps, but for which every classical randomized algorithm needs $n^{\Omega (log n)}$ steps.
+\section{Simon's Algorithm}
+\subsection{Introduction and Historical perspective}
+Simon's algorithm is the first involved Quantum Algorithm, given by Daniel Simon in 1994, it is a very influential Algorithm because Shor's famous algorithm followed Simon's algorithm and uses many of the things which Simon developed in his algorithm. \\[2mm]
+Historically, when Simon published his paper to STOC, this was rejected. Shor, who was in the advisory committee of the conference contacted Simon and understood the result of Simon's Algorithm and started developing the Shor's algorithm. He contact Simon and submitted his paper on Shor's algorithm to FOCS with the promise that if his paper was accepted they will merge their papers. But both their papers were accepted in FOCS conference 1994. \\[2mm]
+The algorithm is a beautiful exposition of Quantum computing and provided an inspiration for Shor's factoring Algorithm.
+\subsection{Comparison with Deutsch-Jozsa and Bernstein-Vazirani algorithms}
+The Deutsch-Jozsa problem showed an exponential quantum improvement over the best deterministic classical algorithms; the Bernstein-Vazirani problem showed a polynomial improvement over the best randomized classical algorithms that have error probability $\leqslant \frac{1}{3}$.\\ [2mm] 
+Simon's algorithm combines these two features it shows quantum computers are provably exponentially more efficient (in terms of number of queries) than bounded-error randomized algorithms.
+\subsection{Problem Statement}
+Given a blackbox $u_f$, for a function $f$ from $n$ bit-strings to $n$ bit-strings i.e $f:\{0,1\}^n\rightarrow \{0,1\}^n$, with the promise that $f$ is $2-1$ function defined as follows:$\forall$ input $(x,y)\in \{0,1\}^n, f(x) = f(y), \iff x=y\oplus s$. \\ [2mm]
+Here, $s\in (0,1)^n$ is secret string. How many queries we need to make to $u_f$ to determine $s$?
+\begin{itemize}
+  \item $f(x) = f(y), \iff x=y\oplus s$
+  \item $x\neq y\oplus s$, then $f(x) \neq f(y)$
+  \item For any s $\neq 0^n$ , f(x) is two-one, other wise if s was 0, function would have been one-one, i.e $(x=y)$
+  \item $x=y\oplus s \iff x \oplus y = s (x \oplus y = (y \oplus s) \oplus y = s) $
+  \item The points in the domain of the function where f(x) is equal, if we XOR the two positions x and y, we get s
+  \item Indeed, if for some $x,y : f(x) = f(y)$, we not only have $x=y\oplus s$, we also have $s = x \oplus y$
+  \item Finding s then reduces to finding a collision pair, i.e for some $(x_i, x_j)$ such that $f(x_i) = f(x_j)$ where $[x_i, x_j \in \{0,1\}^n]$
+\end{itemize}
+\subsubsection{Example}
+Consider $f:\{0,1\}^3\rightarrow \{0,1\}^3$, and $s= 110$
+\begin{center}
+\begin{tabular}{ |c|c| } 
+ \hline
+ x & f(x) \\ 
+ \hline
+ 000 & 101 \\ 
+ \hline
+ 001 & 010 \\ 
+ \hline
+ 010 & 000 \\ 
+ \hline
+ 011 & 110 \\
+ \hline
+ 100 & 000 \\ 
+ \hline
+ 101 & 110 \\
+ \hline
+ 110 & 101 \\ 
+ \hline
+ 111 & 010 \\
+ \hline
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+  \item We take two collisions: $f(000):f(x) = f(110):f(y)$
+  $$x = y\oplus s = 110 \oplus 110 = 000$$ $$s = x\oplus y = 000 \oplus 110 = 110$$
+  \item We take another two collisions: $f(011):f(x) = f(101):f(y)$
+  $$x = y\oplus s = 101 \oplus 110 = 011$$ $$s = x\oplus y = 011 \oplus 101 = 110$$
+\end{enumerate}
+\subsection{Classical Query Complexity}
+What is the classical complexity of collision finding?
+\begin{itemize}
+  \item Suppose we pick T values of $x\in \{0,1\}^n$ , uniformly at random $\{x_1, x_2, ...x_T\}$ and we make T queries to $C_f$ to obtain $\{f(x_1), f(x_2), ...f(x_T)\}$.
+  \item If we obtain a collision with this T queries, i.e we get some $(x_i, x_j)$, such that $f(x_i) = f(x_j)$, we obtain s as $x_i \oplus x_j = s$
+  \item How many pairs of $(x_i, x_j)$ we obtain if we make T queries to $C_f$, we obtain ${T \choose 2 }$ pairs  $= \frac {(T)(T-1)}{2}$ pairs
+  \item What is the probability that any fixed pair $(x_i, x_j)$ has a collision?
+   \begin{enumerate}
+  \item The number of possible bit strings possible out of $[x_i, x_j \in \{0,1\}^n] = 2^n$
+  \item We know that ${s \neq 0^n}$, so number of options available is $2^n -1 $
+  \item $x_j\oplus y_j $ can have any non-zero bit strings out of which 1 bit-string is s, so probability of finding a collision is $P(collision) = \frac{1}{{2^n}-1}$
+   \end{enumerate}
+  \item Expected number of collisions after making T queries is $= \frac{1}{{2^n}-1} {T \choose 2 } = \frac{T(T-1)}{2({2^n}-1)} \approx \frac{T^2}{2^{n+1}} $
+  \item We want at least one collision, so $\frac{T^2}{2^{n+1}}  \geqslant 1 \implies T \geqslant \sqrt{2^{n+1}}$
+  \item So classically we will need $\mathcal{O}(2^n)$ queries
+  \item There also exists a $\Omega(2^n)$ lower bound. Thus the analysis is tight and classically we need exponentially many queries.
+\end{itemize}
+ 
+\subsection{Quantum Algorithm}
+Simon's algorithm starts with the input $|0^{n}\rangle \otimes |0^{n}\rangle =|0^{n}\rangle |0^{n}\rangle$, where $|0^{n}\rangle$ is the quantum state with $n$ zeros.
+\begin{center}
+\begin{quantikz}
+\lstick{$\ket {0^n}$} & \gate[wires=1][1cm]{H^{\otimes n}} & \gate[wires=2][2cm]{U_f} & \qw & \gate[wires=1][1cm]{H^{\otimes n}} & \meter{} & \cw\\
+\lstick{$\ket {0^n}$} & \qw & \qw & \qw & \qw & \meter{} & \cw
+\end{quantikz}
+\end{center}
+\subsubsection*{After first Hadamard operation}
+\begin{equation}
+    (H^{\otimes n}\ket{0^n})\otimes\ket{0^n} = \big(\frac{1}{\sqrt{2^n}}\sum_{x \in \{0, 1\}^{n}} \ket{x}\big)\otimes \ket{0^n} = \frac{1}{2^{n/2}} \sum_{x \in {0, 1}^n} (\ket{x} \otimes \ket{0^n})
+\end{equation}
+\subsubsection*{Oracle Computation}
+We call the oracle or black-box $(U_f)$ to compute the function $f$ on the transformed input (obtained after the Hadamard operation).
+\begin{equation}
+    \frac{1}{2^{n/2}} \sum_{x \in \{0, 1\}^n} (\ket{x} \otimes \ket{0^n}) \xrightarrow{U_f} {\frac {1}{2^{n/2}}}\sum _{x\in \{0,1\}^{n}}\left(\left|x\right\rangle \otimes \left|f(x)\right\rangle \right)
+\end{equation}
+\subsubsection*{After second Hadamard operation}
+\begin{equation*}
+    {\begin{aligned} {\frac {1}{2^{n/2}}}\sum _{x\in \{0,1\}^{n}}\left(\left|x\right\rangle \otimes \left|f(x)\right\rangle \right) &\xrightarrow{H^{\otimes n} \otimes \mathbb{I}} {\frac {1}{2^{n/2}}}\sum _{x\in \{0,1\}^{n}}\left(\left(H^{\otimes n}\left|x\right\rangle \right)\otimes \left|f(x)\right\rangle \right)\\[4pt] &={\frac {1}{2^{n/2}}}\sum _{x\in \{0,1\}^{n}}\left(\left({\frac {1}{2^{n/2}}}\sum _{y\in \{0,1\}^{n}}(-1)^{x\cdot y}\left|y\right\rangle \right)\otimes \left|f(x)\right\rangle \right)\\[4pt] &={\frac {1}{2^{n}}}\sum _{x\in \{0,1\}^{n}}\left(\sum _{y\in \{0,1\}^{n}}\left((-1)^{x\cdot y}\left|y\right\rangle \otimes \left|f(x)\right\rangle \right)\right)\end{aligned}}
+\end{equation*}
+\newline
+We have the following expression as output of the above presented circuit for Simon's algorithm.
+\begin{equation*}
+    {\frac {1}{2^{n}}}\sum _{x\in \{0,1\}^{n}}\left(\sum _{y\in \{0,1\}^{n}}\left((-1)^{x\cdot y}\left|y\right\rangle \otimes \left|f(x)\right\rangle \right)\right) = \sum _{y\in \{0,1\}^{n}}\left(\left|y\right\rangle \otimes \left({\frac {1}{2^{n}}}\sum _{x\in \{0,1\}^{n}}\left((-1)^{x\cdot y}\left|f(x)\right\rangle \right)\right)\right)
+\end{equation*}
+Finally, at the end of the circuit, a measurement is performed.
+\subsubsection{Measurement and Post-processing}
+After running the above circuit operations we have: 
+\begin{itemize}
+    \item When $x \oplus y = 0^n $ (i.e. $s=0^n$), the measurement results in each string $y \in \{ 0, 1\}^n$ with probability $p_y = \frac{1}{ 2^n }$
+    \item in the cas\ $x \oplus y = s $ (where $s \neq 0^n$), the probability to obtain each string $y \in \{ 0, 1\}^n$ is given by
+    $$p_y =
+    \begin{cases}
+    {1/2^{n-1}} &\quad \text{if } y \cdot s \text{ is even}\\
+    0 &\quad \text{if } y \cdot s \text{ is odd}\\
+    \end{cases}$$
+\end{itemize}
+Thus, in both cases, the measurement results is some string $y \in \{ 0, 1\}^n$ that satisfies $s \cdot y = 0$, and the distribution is uniform over all of the strings that satisfy this constraint and this is enough information to determine $s$.\\[2mm]
+We repeat the above process $n - 1$ times to get $n - 1$ strings $y_1, y_2, \dots, y_{n-1} \in \{ 0, 1\}^n$, such that
+$$
+\begin{cases}
+y_1 \cdot s &= 0 \\
+y_2 \cdot s &= 0 \\
+&\vdots \\
+y_{n-1} \cdot s &= 0
+\end{cases}
+$$
+and we can use this set of linear \
+equations to find $s$. We only get a unique non-zero solution $s$ if $y_1, y_2, 
+\dots, y_{n-1} \in \{ 0, 1\}^n$ are linearly independent (probability $\geq 1/4$).
+
+\subsection{Complexity}
+Simon's algorithm requires $O(n)$ queries to the black box, whereas a classical algorithm would need at least $\Omega (2^{n/2})$ queries. It is also known that Simon's algorithm is optimal in the sense that any quantum algorithm to solve this problem requires $\Omega (n)$ queries.
+\nocite{*}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
+
