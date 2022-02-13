@@ -1,0 +1,151 @@
+\documentclass[11.5pt, paper=a4]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath, amssymb, amscd, amsthm, amsfonts, mathtools}
+\usepackage[left=2cm, right=2cm, top=1.5cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{physics}
+\usepackage{tikz}
+\usepackage{url}
+\usepackage[square,numbers]{natbib}
+\usepackage{tabularx}
+
+\usepackage{braket}
+\usepackage{thmtools}
+\usepackage{float}
+
+%%% Theorem Style
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\numberwithin{theorem}{section}
+
+%% Autoref prefixes
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+\renewcommand{\figureautorefname}{Figure}
+\def\theoremautorefname{Theorem}
+\def\lemmaautorefname{Lemma}
+\def\definitionautorefname{Definition}
+\def\conjectureautorefname{Conjecture}
+\def\algorithmautorefname{Algorithm}
+
+%% Writing algorithms
+
+\usepackage{algorithm} % captioning 
+\usepackage{algpseudocode}
+
+% \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
+
+\graphicspath{{./Lecture_8/images/}}
+
+\title{Quantum Algorithms, Spring 2022: Lecture 8 Scribe}
+
+\author{Pahulpreet Singh \and Shreyas Pradhan}
+
+\date{February 04, 2022}
+
+\begin{document}
+
+\maketitle
+
+\section{Recap}
+
+% TODO: Simon's algorithm – Quantum Implementation
+
+\section{Q.F.T. and its applications}
+
+\subsection{Elementary Concepts}
+
+\subsubsection{Complex Roots of Unity}
+
+\begin{align*}
+    \omega^N = 1  \hspace{100px}                  & \omega = e^{\displaystyle \frac{-2\pi\iota}{N}} \\
+    1 + \omega + \omega^2 + \cdots + \omega^{N-1} & = 0
+\end{align*}
+
+% Insert Example Figure
+
+\subsubsection{Discrete Fourier Transform}
+
+A complex vector $\big(x_0, x_1, \cdots, x_{N-1} \big)$ is transformed to another complex vector
+$\big( y_0, y_1, \cdots, y_{N-1} \big)$ such that:
+
+\begin{equation}
+    y_k = \sum_{j=0}^{N-1} x_j \cdot \omega^{jk}
+\end{equation}
+
+\subsection{Quantum Fourier Transform}
+
+For Q.F.T. (Quantum Fourier Transform), the same transformation is carried out, except that it maps
+quantum states to quantum states.
+
+\paragraph{Example}
+Say $N = 2^n$ and $\{ \ket{0}, \ket{1}, \cdots, \ket{N-1} \}$ are computational basis states. Then
+QFT on a state $\ket{j}$ is defined as:
+
+\[
+    \ket{j} \xmapsto{QFT} \displaystyle \frac{1}{\sqrt{N}} \sum_{k=0}^{N-1} \omega^{jk} \ket{k}
+\]
+
+where $\displaystyle \frac{1}{\sqrt{N}}$ is the normalization factor. Generalizing this to an ensemble of states,
+
+\begin{align}
+    \sum_{j=0}^{N-1} x_j\ket{j} \xmapsto{QFT} & \sum_{k=0}^{N-1} y_k \ket{k}                   \\
+                                              & \big[ \text{where } y_k = \sum_{j=0}^{N-1} x_j
+        \frac{\omega^{jk}}{\sqrt{N}} \big] \nonumber
+\end{align}
+
+
+We define $F_N$ as the unitary operator for QFT modulo $N$.
+
+\[
+    F_N\ket{j} \xmapsto{} \displaystyle \frac{1}{\sqrt{N}} \sum_{k=0}^{N-1} \omega^{jk} \ket{k}
+\]
+
+And the $(j, k)^{th}$ entry of the matrix is given by:
+
+\[
+    (F_N)_{j,k} = \braket{k|F_N|j} = \displaystyle \frac{\omega^{jk}}{\sqrt{N}}
+\]
+
+From this, we can compute $F_N$ as:
+
+\[
+    F_N = \displaystyle \frac{1}{\sqrt{N}} \begin{pmatrix}
+        1      & 1            & 1               & \cdots & 1                \\
+        1      & \omega       & \omega^2        & \cdots & \omega^{N-1}     \\
+        1      & \omega^2     & \omega^4        & \cdots & \omega^{2(N-1)}  \\
+        \vdots &              &                 & \ddots & \vdots           \\
+        1      & \omega^{N-1} & \omega^{2(N-1)} & \cdots & \omega^{(N-1)^2} \\
+    \end{pmatrix}
+\]
+
+\begin{enumerate}
+    \item Classically, for D.F.T., we need $O(N \log{N})$ steps / operations to F.F.T. (Fast Fourier Transform).
+    \item For QFT, we shall require $O(\log^2{N})$ elementary gates.
+    \item Instead of a vector, QFT outputs a quantum state!
+    \item Classically, we have access to all the $y_k$ in the vector. This is not the case for QFT.
+    \item At the end of QFT, we need to make a measurement. We observe some $\ket{k}$ with the probability $|y_k|^2$.
+    \item When we sample from the output state, we do so according to the Fourier Transform coefficients. (This is called Fourier Sampling)
+\end{enumerate}
+
+
+
+
+\bibliographystyle{plainnat}
+\nocite{*}
+\bibliography{references}
+
+\end{document}
+
