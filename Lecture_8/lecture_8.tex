@@ -11,6 +11,7 @@
 \usepackage{hyperref}
 \usepackage{physics}
 \usepackage{tikz}
+\usetikzlibrary{quantikz}
 \usepackage{url}
 \usepackage[square,numbers]{natbib}
 \usepackage{tabularx}
@@ -63,6 +64,15 @@
 
 % TODO: Simon's algorithm – Quantum Implementation
 
+\begin{figure}[hb]
+    \centering
+    \begin{quantikz}
+        \lstick{$\ket {0}^{\otimes n}$} & \gate[wires=1][1cm]{H^{\otimes n}} & \gate[wires=2][2cm]{U_f} & \qw & \gate[wires=1][1cm]{H^{\otimes n}} & \meter{} & \cw\\
+        \lstick{$\ket {0}^{\otimes n}$} & \qw & \qw & \qw & \qw & \meter{} & \cw
+    \end{quantikz}
+    \caption{Quantum Implementation of Simon's Algorithm} \label{fig:1}
+\end{figure}
+
 \section{Q.F.T. and its applications}
 
 \subsection{Elementary Concepts}
@@ -74,7 +84,30 @@
     1 + \omega + \omega^2 + \cdots + \omega^{N-1} & = 0
 \end{align*}
 
-% Insert Example Figure
+
+
+\begin{figure}[ht]
+    \def\n{5}
+    \centering
+    \begin{tikzpicture}[
+            scale = 1.5,
+            dot/.style={draw,fill,circle,inner sep=1pt}
+        ]
+        \draw[->] (-2,0) -- (2,0) node[below] {$\mathbb{R}$};
+        \draw[->] (0,-2) -- (0,2) node[left] {$\mathbb{I}$};
+        \draw[help lines] (0,0) circle (1);
+
+        \node[dot,label={below right:$O$}] (O) at (0,0) {};
+        \foreach \i in {1,...,\n} {
+                \node[dot,label={\i*360/\n-(\i==\n)*45:$\omega^{\i}$}] (w\i) at (\i*360/\n:1) {};
+                \draw[->] (O) -- (w\i);
+            }
+        \draw[->] (0:.3) arc (0:360/\n:.3);
+        \node at (360/\n/2:.5) {$\alpha$};
+    \end{tikzpicture}
+    \caption{Roots of Unity for N=5} \label{fig:2}
+\end{figure}
+
 
 \subsubsection{Discrete Fourier Transform}
 
