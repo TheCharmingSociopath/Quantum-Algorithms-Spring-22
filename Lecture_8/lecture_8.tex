@@ -62,7 +62,16 @@
 
 \section{Recap}
 
-% TODO: Simon's algorithm – Quantum Implementation
+\subsection{Simon's Algorithm}
+
+Given a blackbox $U_f$, for a function $f$ from $n$ bit-strings to $n$ bit-strings i.e $f:\{0,1\}^n\rightarrow \{0,1\}^n$, with the promise that $f$ is $2-1$ function defined as follows:$\forall$ input $(x,y)\in \{0,1\}^n, f(x) = f(y), \iff x=y\oplus s$. \\ [2mm]
+Here, $s\in (0,1)^n$ is secret string. How many queries to $U_f$ are needed to find $s$?
+
+\subsubsection{Classical Algorithm}
+
+We proved that the complexity is $O(\sqrt{2^n})$. \big[ Matching lower bound exists. \big]
+
+\subsubsection{Quantum Algorithm}
 
 \begin{figure}[hb]
     \centering
@@ -73,6 +82,42 @@
     \caption{Quantum Implementation of Simon's Algorithm} \label{fig:1}
 \end{figure}
 
+After running the circuit operations we have:
+\begin{itemize}
+    \item When $x \oplus y = 0^n $ (i.e. $s=0^n$), the measurement results in each string $y \in \{ 0, 1\}^n$ with probability $p_y = \frac{1}{ 2^n }$
+    \item in the cas\ $x \oplus y = s $ (where $s \neq 0^n$), the probability to obtain each string $y \in \{ 0, 1\}^n$ is given by
+          $$p_y =
+              \begin{cases}
+                  {1/2^{n-1}} & \quad \text{if } y \cdot s \text{ is even} \\
+                  0           & \quad \text{if } y \cdot s \text{ is odd}  \\
+              \end{cases}$$
+\end{itemize}
+Thus, in both cases, the measurement results is some string $y \in \{ 0, 1\}^n$ that satisfies $s \cdot y = 0$, and the distribution is uniform over all of the strings that satisfy this constraint and this is enough information to determine $s$.\\[2mm]
+We repeat the above process $n - 1$ times to get $n - 1$ strings $y_1, y_2, \dots, y_{n-1} \in \{ 0, 1\}^n$, such that
+$$
+    \begin{cases}
+        y_1 \cdot s     & = 0    \\
+        y_2 \cdot s     & = 0    \\
+                        & \vdots \\
+        y_{n-1} \cdot s & = 0
+    \end{cases}
+$$
+and we can use this set of linear \
+equations to find $s$. We only get a unique non-zero solution $s$ if $y_1, y_2,
+    \dots, y_{n-1} \in \{ 0, 1\}^n$ are linearly independent (P $\geq 1/4$).
+
+\begin{itemize}
+    \item Use Gaussian elimination to obtain $s$. \big[ Needs $O(n^3)$ time, but no additional queries to $U_f$ \big]
+    \item Check if $f(0\cdots 0) = f(s)$. If yes, we are done. If not, repeat this whole procedure a few times.
+    \item Repeating the process $O(1)$ times, i.e. $O(n)$ number of queries to $U_f$, are enough to guarantee a high success probability.
+
+          For $k$ runs, \hspace{50px} $P(\text{success}) = 1 - \big( \displaystyle \frac{3}{4} \big)^k = 1 - \epsilon$
+          \hspace{50px} where $k \approxeq \displaystyle \frac{log(1/\epsilon)}{log(4/3)}$
+    \item Query complexity: $O(n)$ \hspace{100px} Quantum lower bound: $\Omega(n)$
+\end{itemize}
+
+For an exact version of Simon's Algorithm, refer to \citet{1}.
+
 \section{Q.F.T. and its applications}
 
 \subsection{Elementary Concepts}
@@ -80,7 +125,7 @@
 \subsubsection{Complex Roots of Unity}
 
 \begin{align*}
-    \omega^N = 1  \hspace{100px}                  & \omega = e^{\displaystyle \frac{-2\pi\iota}{N}} \\
+    \omega^N = 1  \hspace{100px}                  & \omega = e^{{2\pi\iota}/{N}} \\
     1 + \omega + \omega^2 + \cdots + \omega^{N-1} & = 0
 \end{align*}
 
@@ -171,13 +216,13 @@ From this, we can compute $F_N$ as:
     \item Classically, we have access to all the $y_k$ in the vector. This is not the case for QFT.
     \item At the end of QFT, we need to make a measurement. We observe some $\ket{k}$ with the probability $|y_k|^2$.
     \item When we sample from the output state, we do so according to the Fourier Transform coefficients. (This is called Fourier Sampling)
+    \item So, we need to make clever use of QFT to harness its power for algorithmic applications!
 \end{enumerate}
 
 
 
 
 \bibliographystyle{plainnat}
-\nocite{*}
 \bibliography{references}
 
 \end{document}
