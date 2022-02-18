@@ -1,0 +1,243 @@
+\documentclass[11.5pt, paper=a4]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath, amssymb, amscd, amsthm, amsfonts, mathtools}
+\usepackage[left=2cm, right=2cm, top=1.5cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{physics}
+\usepackage{tikz}
+\usepackage{url}
+\usepackage[square,numbers]{natbib} \usepackage{tabularx}
+\usepackage{quantikz}
+
+\usepackage{braket}
+\usepackage{thmtools}
+\usepackage{float}
+
+%%% Theorem Style
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\numberwithin{theorem}{section}
+
+%% Autoref prefixes
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+\renewcommand{\figureautorefname}{Figure}
+\def\theoremautorefname{Theorem}
+\def\lemmaautorefname{Lemma}
+\def\definitionautorefname{Definition}
+\def\conjectureautorefname{Conjecture}
+\def\algorithmautorefname{Algorithm}
+
+%% Writing algorithms
+
+\usepackage{algorithm} % captioning 
+\usepackage{algpseudocode}
+
+% \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
+
+
+
+\title{Quantum Algorithms, Spring 2022: Lecture 9 Scribe}
+
+\author{Nithish Raja, Shodasakshari Vidya}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Recap}
+
+\subsection{Previously seen quantum algorithms}
+
+\begin{table}[h!]
+    \centering
+    \vline
+    \begin{tabular}{c|c|c}
+        \hline
+         \textbf{Algorithm} & \textbf{Classical query complexity} & \textbf{Quantum query complexity}  \\
+         \hline
+         Deutsch & 2 & 1 \\
+         Deutsch - Jozsa & $O(1)$ & 1 \\
+         Bernstein - Vazirani & $O(n)$ & 1 \\
+         Simon's algorithm & $O(2^{n/2})$ & $O(n)$ \\
+         \hline
+    \end{tabular}
+    \vline
+    \caption{Comparing query complexity of quantum algorithms and their classical counterparts}
+    \label{tab:my_label}
+\end{table}
+
+\subsection{Quantum Fourier transform}
+
+\begin{equation}
+\label{eqn:QFT on basis states}
+    \ket j \xrightarrow{F_N}\frac{1}{\sqrt{N}}\sum_{k=0}^{N-1}\omega^{jk}\ket k
+\end{equation}
+Probability of observing state K after QFT:
+\begin{equation*}
+    \bra{k}F_N\ket{j} = \frac{\omega^{jk}}{\sqrt{N}}
+\end{equation*}
+Applying QFT on an arbitrary quantum state, we get
+\begin{equation}
+\label{eqn:QFT on an arbitrary state}
+    \sum_{j=0}^{N-1}\alpha_j\ket{j} \xrightarrow{F_N} \frac{1}{\sqrt{N}}\sum_{k=0}^{N-1}\sum_{j=0}^{N-1}\alpha_j\omega^{jk}\ket{k}
+\end{equation}
+Above equation can be written in short as
+\begin{equation*}
+    \sum_{j=0}^{N-1}\alpha_j\ket{j} \xrightarrow{F_N} \sum_{k=0}^{N-1}\beta_k\ket{k} \text{, where } \beta_k = \frac{1}{\sqrt{N}}\sum_{j=0}^{N-1}\alpha_j\omega^{jk}
+\end{equation*}
+QFT is calculated by applying the following unitary transform on the quantum state
+\begin{equation*}
+    F_N = \begin{bmatrix} 
+	1 & 1 & 1 & \dots & 1 \\
+	1 & \omega & \omega^2 & \dots & \omega^{N-1}\\
+	1 & \omega^2 & \omega^4 & \dots & \omega^{2(N-1)}\\
+	\vdots & \vdots & \vdots & \ddots  & \vdots\\
+	1 & \omega^{N-1} & \omega^{2(N-1)} & \dots & \omega^{(N-1)^2}\\
+	\end{bmatrix}_{N\times N}
+\end{equation*}
+Unlike DFT, QFT outputs a quantum state. Because of this, measurement yeilds a random state $\ket{k}$ with some probability $\norm{\beta_k}^2$. Using this we can perform fourier sampling.
+\section{Useful properties of QFT}
+\subsection{QFT is shift invariant}
+\label{subsec:QFT is shift invariant}
+Consider an arbitrary quantum state $\ket{\psi} = \sum_{j=0}^{N-1}\alpha_j\ket{j}$, applying QFT to it, we get
+\begin{equation*}
+    F_N(\sum_{j=0}^{N-1}\alpha_j\ket{j}) = \sum_{k=0}^{N-1}\beta_k\ket{k}, \text{ where } \beta_k=\frac{1}{\sqrt{N}}\sum_{j=0}^{N-1}\alpha_j\omega^{jk}
+\end{equation*}
+Now consider applying QFT where each state has been shifted by a constant value $s$
+\begin{equation*}
+    \sum_{j=0}^{N-1}\alpha_j\ket{j+s} \xrightarrow{F_N} \frac{1}{\sqrt{N}}\sum_{j=0}^{N-1}\alpha_j\sum_{k=0}^{N-1}\omega^{(j+s)k}\ket{k}
+\end{equation*}
+\begin{equation*}
+    = \frac{1}{\sqrt{N}}\sum_{k=0}^{N-1}\omega^{sk}\sum_{j=0}^{N-1}\alpha_j\omega^{jk}\ket{k}
+\end{equation*}
+\begin{equation*}
+    = \sum_{k=0}^{N-1}\omega^{sk}\beta_k\ket{k}
+\end{equation*}
+Probablity to observe state $\ket{k}$ is still $\norm{\beta_k}^2$. Therefore, shifting of initial state by a constant value does not change the output state after applying QFT i.e., QFT is shift invariant.
+\subsection{QFT maps a periodic superposition to another periodic superposition}
+Consider a periodic superposition as given below,
+\begin{equation*}
+    \ket{\psi} = \frac{1}{\sqrt{N}}\sum_{k=0}^{A-1}\ket{kr}\tag{$A = \frac{N}{r}$\text{, assuming $r\vert N$}}
+\end{equation*}
+Applying QFT to state $\ket{\psi}$, we get
+\begin{equation*}
+    \frac{1}{\sqrt{A}}\sum_{k=0}^{A-1}\ket{kr} \xrightarrow{F_N} \frac{1}{\sqrt{A}}\sum_{k=0}^{A-1}\frac{1}{\sqrt{N}}\sum_{l=0}^{N-1}\omega^{krl}\ket{l}
+\end{equation*}
+\begin{equation*}
+    = \frac{1}{\sqrt{AN}}\sum_{k=0}^{A-1}\sum_{l=0}^{N-1}\omega^{krl}\ket{k}
+\end{equation*}
+\begin{equation*}
+    \text{Amplitude of state }\ket{l} = \frac{1}{\sqrt{NA}}\sum_{k=0}^{A-1}(\omega^{rl})^k
+\end{equation*}
+\begin{equation*}
+    = \begin{dcases}
+    \frac{1}{\sqrt{NA}}*A = \sqrt{\frac{A}{N}},& \text{if }\omega^{rl}=1\\
+    \frac{1}{\sqrt{NA}}\frac{(1-\omega^{rlA})}{(1-\omega^{rl})},& \text{if }\omega^{rl}\neq1
+    \end{dcases}
+\end{equation*}
+Given that $A=\frac{N}{r}$, consider amplitude of states where $l=\frac{jN}{r}$
+\begin{equation*}
+    \omega^{lr}=1
+\end{equation*}
+\begin{equation*}
+    \alpha_{\frac{jN}{r}}=\frac{1}{\sqrt{r}}\tag{$\forall j\epsilon\{0,1,\dots,r-1\}$}
+\end{equation*}
+Therefore,
+\begin{equation}
+\label{eqn:QFT on a periodic state}
+    \sqrt{\frac{r}{N}}\sum_{k=0}^{\frac{N}{r}-1}\ket{kr} \xrightarrow{F_N} \frac{1}{\sqrt{r}}\sum_{j=0}^{r-1}\ket{\frac{jN}{r}}
+\end{equation}
+Sum of probability of above states add up to 1. Therefore, probability of states where $A\neq\frac{N}{r}$ is zero.
+
+\section{Quantum period finding algorithm}
+Let $f:\{0,1\}^n \rightarrow \{0,1\}^m$ be a periodic function with period $r$. $r$ is a positive number satisfying $1 << r << \sqrt{2^{n}}$
+\begin{equation*}
+    f(x) = f(x+kr)\tag{$x, x+kr\epsilon\{0,1,\dots,N-1\}$}
+\end{equation*}
+\begin{equation*}
+    f(x) = f(x+kr) \iff f(x) = f(y)\tag{iff $y=x\mod r$}
+\end{equation*}
+Therefore, for a given $x_0$,
+\begin{equation*}
+    f(x_0) = f(x_0 + r) = f(x_0 + 2r) = \dots = f(x_0 + (A-1)r)
+\end{equation*}
+If $r\vert N$, then $A=\frac{N}{r}$ else $A=\lfloor\frac{N}{r}\rfloor$ or $A=\lceil\frac{N}{r}\rceil$.\\ \\
+The quantum circuit for quantum period finding algorithm is given below
+\begin{center}
+    \begin{quantikz}
+        \lstick{$\ket{0}^{\otimes n}$} & \qwbundle{n} & \gate{H} & \gate[wires=2][2cm]{U_f} & \gate{QFT} & \meter{} \\
+        & \lstick{$\ket{0}^{\otimes m}$} & \qwbundle{m} & & \meter{(*)}
+    \end{quantikz}
+\end{center}
+
+\begin{equation*}
+    \ket{0^{\otimes n}}\ket{0^{\otimes m}} \xrightarrow{H^{\otimes n}I} \frac{1}{\sqrt{N}}\sum_{x\epsilon\{0,1\}^n}\ket{x}\ket{0}^{\otimes m} \xrightarrow{U_f} \sum_{x\epsilon \{0,1\}^n}\ket{x}\ket{f(x)}
+\end{equation*}
+\begin{equation*}
+    = \frac{1}{\sqrt{N}}\sum_{x}\frac{1}{\sqrt{A}}\sum_{k=0}^{A-1}\ket{x+kr}\ket{f(x)}
+\end{equation*}
+After measurement in second register, the state collapses into
+\begin{equation*}
+    \frac{1}{\sqrt{A}}\sum_{k=0}^{A-1}\ket{x_0+kr}\ket{f(x_0)}
+\end{equation*}
+Ignoring the value in second register,
+\begin{equation*}
+    \frac{1}{\sqrt{A}}\sum_{k=0}^{A-1}\ket{x_0+kr}
+\end{equation*}
+We know that QFT is shift invariant, therefore the above state can be written as
+\begin{equation*}
+    \frac{1}{\sqrt{A}}\sum_{k=0}^{A-1}\ket{kr} \xrightarrow{F_N} \sum_{l}\alpha_l\ket{l}
+\end{equation*}
+\begin{equation*}
+    \alpha_l = \frac{1}{\sqrt{NA}}\sum_{k=0}^{A-1}(\omega^{rl})^k = \begin{dcases}
+    \sqrt{\frac{A}{N}},& \text{if }\omega^{rl}=1\\
+    \frac{1}{\sqrt{NA}}\frac{(1-\omega^{rlA})}{(1-\omega^{rl})},& \text{if }\omega^{rl}\neq1
+    \end{dcases}
+\end{equation*}
+Case 1: $r\vert N$ i.e., $A=\frac{N}{r}$
+From \ref{eqn:QFT on a periodic state}, we know that
+\begin{equation*}
+    \frac{1}{\sqrt{A}}\sum_{k=0}^{A-1}\ket{kr} \xrightarrow{F_N} \frac{1}{\sqrt{r}}\sum_{j=0}^{r-1}\ket{\frac{jN}{r}}
+\end{equation*}
+At this point, we make a measurement and observe some $\frac{s_1N}{r}$, $s_1\epsilon\{0,1,\dots,r-1\}$.\\
+Making multiple runs of the circuit, we get $\{\frac{s_1N}{r},\frac{s_2N}{r},\dots,\frac{s_kN}{r}\}$.
+If ${s_1,s_2,\dots,s_N}$ are coprimes, then the GCD of $\{\frac{s_1N}{r},\frac{s_2N}{r},\dots,\frac{s_kN}{r}\}$ will be $\frac{N}{r}$. Using euclid's algorithm, GCD can be calculated in $\log N$ time.\\
+We know $N$, therefore the value of $r$ can be calculated.
+\subsection{Probability that k randomly selected numbers are co-primes}
+Consider $s_i\epsilon\{1,2,\dots,n\}$. Let $p$ be a prime number s.t. $p\vert s_i$ and $\frac{s_i}{p} = q$, where $q\epsilon\{1,2,\dots,\frac{n}{p}\}$.
+\begin{equation*}
+    Pr[p\vert s_i] < \frac{\frac{n}{p} + 1}{n} \sim \frac{1}{p} + \frac{1}{n}
+\end{equation*}
+\begin{equation*}
+    Pr[p\vert s_i]\sim \frac{1}{p}
+\end{equation*}
+\begin{equation*}
+    Pr[\text{k randomly selected numbers are all divisible by p}] \sim \frac{1}{p^k}
+\end{equation*}
+\begin{equation*}
+    Pr[\text{Atleast 1 among k randomly selected numbers is not divisible by p}] \sim 1-\frac{1}{p^k}
+\end{equation*}
+\begin{equation*}
+    Pr[\text{k randomly selected numbers are co-primes}] = \prod_{p\epsilon PRIMES}(1-\frac{1}{p^k}) = \frac{1}{\zeta (k)}
+\end{equation*}
+Here, $\zeta (k)$ represents the reimann zeta function. The value of $\frac{1}{\zeta (k)}$ approaches 1 very quickly. Therefore, for large values of k, the value of $Pr[\text{k randomly selected numbers are coprimes}]$ is very close to 1.
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
+
