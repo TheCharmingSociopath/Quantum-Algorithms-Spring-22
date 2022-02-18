@@ -20,6 +20,7 @@ TA: [Aditya Morolia (Moi!)](https://thecharmingsociopath.github.io/)
 - [Lecture 5](../../raw/build/lecture_5.pdf)
 - [Lecture 6](../../raw/build/lecture_6.pdf)
 - [Lecture 7](../../raw/build/lecture_7.pdf)
+- [Lecture 8](../../raw/build/lecture_8.pdf)
 
 ## Instructions for students
 
