@@ -1,0 +1,380 @@
+\documentclass[11.5pt, paper=a4]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb, amscd, amsthm, amsfonts, mathtools}
+\usepackage[left=2cm, right=2cm, top=1.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{physics}
+\usepackage{tikz}
+\usepackage{url}
+\usepackage[square,numbers]{natbib} \usepackage{tabularx}
+\usetikzlibrary{quantikz}
+\usepackage{braket}
+\usepackage{thmtools}
+\usepackage{float}
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\numberwithin{theorem}{section}
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+\renewcommand{\figureautorefname}{Figure}
+\def\theoremautorefname{Theorem}
+\def\lemmaautorefname{Lemma}
+\def\definitionautorefname{Definition}
+\def\conjectureautorefname{Conjecture}
+\def\algorithmautorefname{Algorithm}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{braket}
+\usepackage{physics}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\title{Quantum Algorithms, Spring 2022: Lecture 10 Scribe}
+\author{Sravani Yanamandra, Srikar Kale}
+\date{\today}
+\begin{document}
+\maketitle
+\section{Recap}
+\subsection{Properties of QFT:}
+\begin{enumerate}
+  \item \textbf{Invariance under shift:}
+    Suppose,
+    \begin{equation*}
+        \sum\limits_{j} \alpha_j  \ket{j} \underrightarrow{QFT} \sum\limits_{k} \beta_k \ket{k} 
+    \end{equation*}
+    then, 
+    \begin{equation*}
+        \sum\limits_{j} \alpha_j  \ket{j+s} \underrightarrow{QFT} \sum\limits_{k} \omega^{sk} \beta_k \ket{k} 
+    \end{equation*}
+    \item \textbf{QFT maps a periodic superposition to a period superposition:}
+  
+    Let, 
+    \begin{equation*}
+        \ket{\psi} = \frac{1}{\sqrt{A}} \sum\limits_{k = 0}^{A-1} \ket{kr}
+    \end{equation*}
+    such that
+    \begin{equation*}
+      A=\frac{N}{r} \;,\; r | N
+    \end{equation*} then,
+    \begin{equation*}
+      QFT\ket{\psi} = \frac{1}{\sqrt{r}} \sum\limits_{j = 0}^{r - 1} \ket{\frac{jN}{r}}
+    \end{equation*}
+    \end{enumerate}
+
+\subsection{Quantum period finding:}
+\begin{enumerate}
+    \item \textbf{Problem statement:} 
+    
+    Given a blackbox $U_f$ for some boolean function $f:\{0,1\}^n \rightarrow \{0,1\}^m$ such that $f$ is a periodic function with $r << \sqrt{N}$ where $N = 2^n$ i.e, $f(x) = f(y) \Leftrightarrow  y =x(mod$ r$)$. How many queries to $U_f$ are required to find $r$?
+    
+    \item \textbf{Circuit:}
+    \begin{center}
+    \begin{quantikz}
+        \lstick{$\ket{0}^{\otimes n}$} & \qwbundle{n} & \gate{H} & \gate[wires=2][2cm]{U_f} & \gate{QFT} & \meter{} \\
+        & \lstick{$\ket{0}^{\otimes n}$} & \qwbundle{n} & & \meter{(*)}
+    \end{quantikz}
+    \end{center}
+
+    \item \textbf{Equations:}
+   
+    Hadamard gate applied to first register:
+    \begin{equation*}
+        \ket{0}^{\otimes n}\ket{0}^{\otimes n} \xrightarrow{H^{\otimes n} \otimes I} \frac{1}{\sqrt{N}} \sum\limits_{x \in \{0,1\}^n}\ket{x}\ket{0}
+    \end{equation*}
+    
+    $U_f$ applied to both registers
+    \begin{equation*}
+        \frac{1}{\sqrt{N}} \sum\limits_{x \in \{0,1\}^n}\ket{x}\ket{0} \xrightarrow{U_f} \frac{1}{\sqrt{N}} \sum\limits_{x \in \{0,1\}^n}\ket{x}\ket{f(x)}
+    \end{equation*}
+    
+    Measuring 2nd register and observe $f(x_0)$: 
+    \begin{equation*}
+        \frac{1}{\sqrt{A}} \sum\limits_{k = 0}^{A-1}\ket{x_0 + kr}
+    \end{equation*}
+    
+    Using the shift in variance property discussed in $Section \; 1.1$ (property 1)
+    \begin{equation*}
+        \frac{1}{\sqrt{A}} \sum\limits_{k = 0}^{A-1}\ket{x_0 + kr}  = \frac{1}{\sqrt{A}} \sum\limits_{k = 0}^{A-1}\ket{kr}    
+    \end{equation*}
+    
+    Applying QFT on the remaining qubits
+    \begin{equation*}
+        \frac{1}{\sqrt{A}} \sum\limits_{k = 0}^{A-1}\ket{kr}  \xrightarrow{QFT}  \frac{1}{\sqrt{AN}} \sum\limits_{l = 0}^{N-1}\sum\limits_{k = 0}^{A-1} (\omega^{rl})^k\ket{l} 
+    \end{equation*}
+    
+    \item \textbf{Amplitude of $\ket{l}$:}
+    
+    \begin{equation*}
+        \alpha_l = \frac{1}{\sqrt{AN}} \sum\limits_{k = 0}^{A-1} (\omega^{rl})^k
+    \end{equation*}
+    
+    \begin{equation*}
+        \alpha_l = \begin{cases} 
+        {\sqrt{\frac{A}{N}}} &\quad \text{if} \; \omega^{rl} = 1\\
+         \frac{1}{\sqrt{NA}}\frac{(1-\omega^{rlA})}{(1-\omega^{rl})} &\quad \text{if} \; \omega^{rl} \neq 1\\
+        \end{cases}
+    \end{equation*}
+    
+    \item \textbf{We have 2 cases:} 
+    \begin{enumerate}
+        \item Case 1:
+        \begin{equation*}
+            r|N \implies A = \frac{N}{r}
+        \end{equation*}
+        \item Case 2:
+        \begin{equation*}
+            r \nmid N \implies A = \left\lceil \frac{N}{r}  \right\rceil \;or \left\lfloor \frac{N}{r} \right\rfloor  \; ,  \; A-1 \leq \frac{N}{r} \leq A+1
+        \end{equation*}
+    \end{enumerate}
+    \item \textbf{We had already discussed Case 1 in the previous class and analysed it as follows:}
+        \begin{equation*}
+            r|N \implies A = \frac{N}{r}
+        \end{equation*}
+        \begin{equation*}
+            \sqrt{\frac{r}{N}} \sum \limits_{k = 0}^{\frac{N}{r} - 1} \ket{kr} \rightarrow \frac{1}{\sqrt{r}} \sum \limits_{j = 0}^{r - 1} \ket{\frac{jN}{r}}
+        \end{equation*}
+        \begin{enumerate}
+            \item Measuring the first register gives $s_1 \frac{N}{r}$
+            \item Repeating $k = \theta(1)$ times we have $\{s_1\frac{N}{r}, s_2 \frac{N}{r}, s_3 \frac{N}{r}, ...., s_k \frac{N}{r} \}$
+            \item With very high probability, $S_i$'s are relatively co prime
+            \item gcd$\{s_1\frac{N}{r}, s_2 \frac{N}{r}, s_3 \frac{N}{r}, ...., s_k \frac{N}{r} \} =  \frac{N}{r} $ which gives us $r$ as $N$ is known.
+            \item The additional cost here is $O(logN)$ from Euclid's GCD algorithm
+            \item If the $S_i$'s are not relatively co prime, we wont be able to detect the mistake in the next step. To overcome this we can take $k$ to be large enough such that the probability is extremely high or repeat the algo and verify $r$ in the subsequent iteration.
+            \item These are not deterministic algorithm's
+        \end{enumerate}
+\end{enumerate}
+\section{Things to know for this class:}
+\subsection{Properties of sin(x):}
+
+\begin{enumerate}
+    \item For $x \in \mathbb{R}$, $\theta < \frac{|sin(x)|}{|x|} < 1 \implies sin^2(x) < x^2$,  this can be derived using the Mean Value Theorem 
+    \item For $0 \leq |x| \leq \frac{\pi}{2},  |sin(x)| \geq \frac{2|x|}{\pi}$
+    
+    This is because $\frac{|sin(x)|}{|x|}$ is a decreasing function for the interval $0 \leq |x| \leq \frac{\pi}{2}$. Let $ g(|x|) =\frac{|sin(x)|}{|x|} \; then \; g(|x|) \geq g(\frac{\pi}{2}) $ (for decreasing functions only)
+    
+    \item $sin^2(\pi q \pm \theta) = sin^2(\theta) \; as \;  sin(\pi q \pm \theta) = \pm sin(\theta) \; when \; q \in \mathbb{N}_0$
+\end{enumerate}
+
+\subsection{Continued fractions}
+The idea of the continued fractions method is to describe real numbers in terms of integers alone.  A ﬁnite simple continued fraction is deﬁned by a ﬁnite collection $a_0 , . . . , a_N$ of positive integers as
+\begin{equation*}
+    [a_0, a_1,....,a_N] = a_0 + \frac{1}{a_1 + \frac{1}{a_2 + \frac{1}{...+\frac{1}{a_N}}}}
+\end{equation*}
+We deﬁne the nth convergent $(0 \leq n \leq N )$ to this continued fraction to be $[a_0 , . . . , a_n ]$.
+\\
+Suppose we are trying to decompose 31/13 as a continued fraction. 
+
+The ﬁrst step of the continued fractions algorithm is to \textbf{split} 31/13 into its integer and fractional part,
+\begin{equation*}
+    \frac{31}{13} = 2 + \frac{5}{13}
+\end{equation*}
+
+Next we \textbf{invert} the fractional part, obtaining
+\begin{equation*}
+    \frac{31}{13} = 2 + \frac{1}{\frac{13}{5}}
+\end{equation*}
+
+And we keep on going forward with the \textbf{split and invert} procedure, we would end up with
+
+\begin{equation*}
+      \frac{31}{13} = 2 + \frac{1}{2 +\frac{1}{1+ \frac{1}{1+\frac{1}{2}}}}
+\end{equation*}
+\\
+\begin{enumerate}
+    \item It’s clear that the continued fractions algorithm terminates after a ﬁnite number of ‘split and invert’ steps for any rational number, since the numerators which appear are strictly decreasing.
+    \item The continued fractions algorithm provides an unambiguous method for obtaining a continued fraction expansion of a given rational number.
+    \item The only possible ambiguity comes at the ﬁnal stage, because it is possible to split an integer in two ways, either $a_N = a_N$ , or as $a_N = (a_N - 1) + 1/1 $, giving two alternate continued fraction expansions.
+    \item This ambiguity is actually useful, since it allows us to assume without loss of generality that the continued fraction expansion of a given rational number has either an odd or even number of convergent, as desired.
+    \item How quickly does this termination occur?
+        It follows that if $x = \frac{p}{q}$ is a rational number, $p \; \& \; q$ are $L$ bit integers, then the continued fraction expansion for $x$ can be computed using $O(L^3)$ operations – $O(L)$ ‘split and invert’ steps, each using $O(L^2)$ gates for elementary arithmetic.
+\end{enumerate}
+
+\subsection{Useful claim 1:}
+\begin{claim}
+2 distinct rational numbers with denominators $\leq r$ are atleast $\frac{1}{r^2}$ apart
+\end{claim}
+\begin{proof}
+Let $Z = \frac{X}{Y}$ and $Z' = \frac{X'}{Y'}$ with $(Y,Y')\leq r$ then 
+\begin{equation*}
+    |Z - Z'| = |\frac{XY'-X'Y}{YY'}|
+\end{equation*}
+The numerator will be $\geq 1$ while the denominator will be $\leq r^2$ so we can say 
+\begin{equation*}
+    |Z - Z'| \geq \frac{1}{r^2}
+\end{equation*}
+\end{proof}
+\subsection{Useful claim 2}
+\begin{claim}
+Let $p,q \in Z^{+}$, and $x \in Q$ that satisfy the following: 
+\begin{equation*}
+    |x - \frac{p}{q}| \leq \frac{1}{2q^2}
+\end{equation*}
+Also let $c = (c_0, c_1,....,c_m)$ be the continued fraction expansion of $x$ then there exists some $Q \in \{0,1,2,...M\}$ such that the $Q^{th}$ convergent $C_Q = (c_0, c_1,....,c_Q)$ is exactly $\frac{p}{q}$. Further more choosing $M = O(log N)$ suffices, where $p \;\&\; q$ are $logN$ bit integers.
+\end{claim}
+\begin{proof}
+The proof of this claim is available in the Quantum Computation and Quantum Information textbook by Michael A. Nielsen $\&$ Isaac L. Chuang, Appendix: Number Theory.
+\end{proof}
+
+\section{Main crux of lecture 10:}
+\subsection{Quantum period finding, Case 2:}
+    We know,
+    \begin{equation*}
+        r \nmid N \implies A = \left\lceil \frac{N}{r}  \right\rceil \;or \left\lfloor \frac{N}{r} \right\rfloor  \; ,  \; A-1 \leq \frac{N}{r} \leq A+1
+    \end{equation*}
+    Let 
+    \begin{equation*}
+        \alpha_l = \frac{1}{\sqrt{NA}}\frac{(1-\omega^{rlA})}{(1-\omega^{rl})}, \omega = e^{\frac{i2\pi}{N}}
+    \end{equation*}
+    In this case, we will argue that $l$ is still very close to some $\frac{jN}{r}$
+    \begin{equation*}
+        |\alpha_l|^2 = \frac{1}{NA} \frac{|1- e^{\frac{2irlA\pi}{N}}|^2}{|1-e^{\frac{2irl\pi}{N}}|^2}
+    \end{equation*}
+    We know that
+    \begin{equation*}
+        |1-e^{i\theta}| = |\frac{2ie^{\frac{i\theta}{2}} (e^{\frac{-i\theta}{2}} - e^{\frac{i\theta}{2}})}{2i}|
+    \end{equation*}
+    \begin{equation*}
+        |1-e^{i\theta}|  = 2|-i e^{\frac{i\theta}{2`}}sin(\frac{\theta}{2})|
+    \end{equation*}
+    Which implies,
+    \begin{equation*}
+        |1-e^{i\theta}|^2 = 4sin^2(\frac{\theta}{2})
+    \end{equation*}
+    Coming back to $\alpha_l$
+    \begin{equation*}
+        |\alpha_l|^2 = \frac{1}{NA} \frac{sin^2(\frac{rlA\pi}{N})}{sin^2(\frac{rl\pi}{N})} 
+    \end{equation*}
+    So the probability of observing some $l$ is given by $|\alpha_l|^2$ which is $\frac{1}{NA} \frac{sin^2(\frac{rlA\pi}{N})}{sin^2(\frac{rl\pi}{N})} $. 
+    \\
+    What is the probability of $l$ being close to some multiple of $\frac{N}{r}$?
+    \\
+    Consider, $l = \frac{mN}{r} + \delta_m$ where $m \in \{0,1,..., r-1 \}$,  $\delta_m$ is a very small value. We know that $|\delta_m| < 0.5$ (we want this kind of accuracy, rather). The intuition behind this is that the nearest integer from $\frac{mN}{r}$ would be less than $0.5$ distance away.
+    \\
+    We now plug in the value of $l$ 
+    \begin{equation*}
+        \frac{rlA\pi}{N} = \frac{\pi r A}{N}(\frac{mN}{r}+ \delta_m)
+    \end{equation*}
+    \begin{equation*}
+        \frac{rlA\pi}{N} = \pi mA + \frac{\pi r A \delta_m}{N}
+    \end{equation*}
+    Similarly
+    \begin{equation*}
+        \frac{rl\pi}{N} = \pi m + \frac{\pi r  \delta_m}{N}
+    \end{equation*}
+    \\ 
+    Using the property 3 from $Section \; 2.1$ and plugging the above information into $|\alpha_l|^2$,
+     \begin{equation*}
+        |\alpha_l|^2 = \frac{1}{NA} \frac{sin^2(\frac{rlA\pi}{N})}{sin^2(\frac{rl\pi}{N})} 
+    \end{equation*}
+    \begin{equation*}
+        |\alpha_l|^2 = \frac{1}{NA} \frac{sin^2(\frac{\pi r A \delta_m}{N})}{sin^2(\frac{r\pi \delta_m}{N})} 
+    \end{equation*}
+    \\
+    So to get a lower bound on $|\alpha_l|^2$ we use property 2 to the numerator and property 1 to the denominator $present \; in \; Section \; 2.1$. We get
+    \begin{equation*}
+        |\alpha_l|^2 \geq \frac{4A}{\pi^2 N}
+    \end{equation*}
+    \begin{equation*}
+        |\alpha_l|^2 \geq const. \frac{A}{N}  
+    \end{equation*}
+    \\
+    To be able to apply the property for the numerator we need to show $0 \leq |\frac{rlA\pi}{N}| \leq \frac{\pi}{2}$, we know that
+    \begin{equation*}
+        A-1 \leq \frac{N}{r} \leq A+1
+    \end{equation*}
+    \begin{equation*}
+        \frac{N}{r} - 1 \leq A \leq \frac{N}{r} + 1
+    \end{equation*}
+    \begin{equation*}
+        1- \frac{r}{N} \leq \frac{Ar}{N} \leq 1+ \frac{r}{N}
+    \end{equation*}
+    \\
+    By assumption  $r << \sqrt{N}$, $\frac{rA}{N}\simeq 1$, $\frac{r}{N} \simeq o(\frac{1}{\sqrt{N}})$
+    \\
+    So,
+    \begin{equation*}
+        \frac{\pi r \delta_m A}{N} \simeq \pi \delta_m
+    \end{equation*}
+    \begin{equation*}
+        0 \leq \frac{\pi r \delta_m A}{N} \leq \frac{\pi}{2} \pm O(\frac{r}{N})
+    \end{equation*}
+    We can ignore the right most term and apply this property to the numerator:
+    \begin{equation*}
+        |\alpha_l|^2 \geq \frac{4A}{\pi^2 N}
+    \end{equation*}
+    \begin{equation*}
+        |\alpha_l|^2 \geq \frac{4}{\pi^2 r}
+    \end{equation*}
+    \\    
+    With a probability $\geq \frac{4}{\pi^2 r} $ we observe some $l$ such that $ l = \frac{mN}{r} + \delta_m $
+    \begin{equation*}
+        |l - \frac{mN}{r}| = \delta_m
+    \end{equation*}
+
+    \begin{equation*}
+        \implies |l - \frac{mN}{r}| < 0.5 \; (as \; \delta_m < 0.5) for \; m \in \{0,1,2,....,r-1 \} 
+    \end{equation*}
+    \\
+    Therefore, the probability of observing any such $'m'$
+    \begin{equation*}
+        \geq  \frac{4}{\pi^2 r} * r 
+    \end{equation*}
+    \begin{equation*}
+        \geq  \frac{4}{\pi^2}
+    \end{equation*}
+    \begin{equation*}
+        \geq 0.4
+    \end{equation*}
+\\
+\textbf{For case 1: } $r|N$, we observed $\frac{mN}{r}$ exactly. If we observe some $'bad'$ value of $l$ we still follow the same procedure and get some $'r'$ and if its erroneous, we repeat it again.
+\\
+Over here, we get some $'l'$ close to $\frac{mN}{r}$ but we dont know which $\frac{mN}{r}$ it is. We need to extract this closeness multiple to $\frac{N}{r}$. Lets say we do that erroneously. We do the procedure a few times and it fails one of the time, and we dont get the correct value of $'r'$ but we are guaranteed that it will succeed with probability $\geq 0.4$
+\\
+\\
+\textbf{So far:}
+\begin{enumerate}
+    \item We have observed some $'l'$ such that with a probability $\geq \frac{4}{\pi ^ 2}$, $|l - \frac{mN}{r}| < 0.5$
+    \item From the above equation $|\frac{l}{N} - \frac{m}{r}| < \frac{1}{2N} < \frac{1}{r^2} \; as \; (r<< \sqrt{N}) $
+    \item $\frac{l}{N} \;\&\; \frac{m}{r}$ are 2 rational numbers
+    \item we know $l \;\&\; N$, we dont know $m \;or\; r$ 
+\end{enumerate}
+
+We need information about $\frac{m}{r}$. From the claim in $section \; 2.3$ we can say that $\frac{m}{r}$ is the only fraction with denominator $\leq r$ that is within $\frac{1}{2r^2}$ of $\frac{l}{N}$. The reason being if any other fraction existed then that distance would be at least $\frac{1}{r^2}$ away from $\frac{m}{r}$.
+\\
+Now there exists a classical procedure that allows us to exactly obtain $\frac{m}{r}$, starting from $\frac{l}{N}$ provided $|\frac{l}{N} - \frac{m}{r}| < \frac{1}{2r^2}$. This procedure is known as continued fraction expansion. This has been explained to some extent in $Section 2.2$.
+\\
+Using the claim in $Section \; 2.4$ Starting from $\frac{l}{N}$, we can exactly obtain $\frac{m}{r}$ in $O(log N)$ steps. After the continued fraction algorithm, we end up with $\frac{m}{r}$.
+\\
+Repeat QFT algorithm and the continued fraction algorithm k times such that we get:
+\begin{equation*}
+    \{ \frac{m_1}{r},  \frac{m_2}{r}, ...,  \frac{m_k}{r}\}
+\end{equation*}
+\\
+then,
+\begin{equation*}
+    gcd\{ \frac{m_1}{r},  \frac{m_2}{r}, ...,  \frac{m_k}{r}\} \; to \; get \; r
+\end{equation*}
+\\
+where $m_1,m_2, ... , m_k$ are relatively coprime with very high probability. The GCD calculation will take $O(log N)$ steps.
+
+\subsection{Analysis of QFT period finding, case 2:}
+\begin{enumerate}
+    \item Query complexity: $K = \theta(1)$ to $U_f$
+    \item Additional costs:
+    \begin{enumerate}
+        \item $O(log N)$ overhead for GCD and continued fractions calculations
+        \item $log N$ number of Hadamard gates needed
+        \item QFT circuit: $O(log^2 N)$ elementary gates.
+    \end{enumerate}
+\end{enumerate}
+
+\end{document}
