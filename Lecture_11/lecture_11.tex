@@ -1,0 +1,235 @@
+\documentclass[11.5pt, paper=a4]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath, amssymb, amscd, amsthm, amsfonts, mathtools}
+\usepackage[left=2cm, right=2cm, top=1.5cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{physics}
+\usepackage{tikz}
+\usetikzlibrary{quantikz}
+\usepackage{url}
+\usepackage[square,numbers]{natbib}
+\usepackage{tabularx}
+
+\usepackage{braket}
+\usepackage{thmtools}
+\usepackage{float}
+\usepackage{tcolorbox}
+
+%%% Theorem Style
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\numberwithin{theorem}{section}
+
+%% Autoref prefixes
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+\renewcommand{\figureautorefname}{Figure}
+\def\theoremautorefname{Theorem}
+\def\lemmaautorefname{Lemma}
+\def\definitionautorefname{Definition}
+\def\conjectureautorefname{Conjecture}
+\def\algorithmautorefname{Algorithm}
+
+%% Writing algorithms
+
+\usepackage{algorithm} % captioning 
+\usepackage{algpseudocode}
+
+% \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
+
+\graphicspath{{./Lecture_X/images/}}
+
+\title{Quantum Algorithms, Spring 2022: Lecture 11 Scribe}
+
+\author{Srinidhi P V}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Recap}
+In the last two lecture, we covered the period finding problem and discussed a quantum algorithm to solve it. Here's a quick overview:
+\\
+\textbf{Problem}: Given a unitary $U_f$ for the function $f:\{0,1\}^n \rightarrow \{0,1\}^m$ where $f$ is periodic with period $r$, we want to know how many queries to $U_f$ is needed to determine $r$?
+\begin{itemize}
+    \item  $f$ is periodic with period $r$ means that $f(x) = f(y) \iff x = y (mod r)$
+    \item $r \ll \sqrt{N}$ where $N = 2^n$
+\end{itemize}
+\newline
+\textbf{Quantum Algorithm}
+Below is a quantum circuit for the period finding problem
+
+\begin{center}
+\begin{quantikz}
+\lstick{$\ket{0}^{\otimes n}$} & \gate{H^{\otimes n}} & \gate[wires =2]{U_f} & \gate{QFT_N} & \meter{}\\
+\lstick{$\ket{0}^{\otimes m}$} & \qw & & \meter{}
+\end{quantikz}
+\end{center}
+\newline
+\textbf{Number of queries}: The analysis is split into two parts
+\begin{itemize}
+    \item \textbf{Case 1}: $r$ divides $N$
+    \begin{itemize}
+        \item In this case, we have exactly $\frac{N}{r}$ terms for $x$ corresponding to each distinct value of $f(x)$
+        \item By measuring the second register, we end up with $\sqrt{r/N} \sum_{k=0}^{N/r -1} \ket{k r}$ on the first register
+        \item Finally, applying QFT on the first register, we end up with the state
+        $\sqrt{1/r} \sum_{j=0}^{r -1} \ket{j \frac{N}{r}}$
+        \item Measuring the first register, we get an integer multiple of $\frac{N}{r}$
+        \item Repeating this procedure $\Theta(1)$ ($k$ times/queries), we get : $\{s_1 \frac{N}{r}, \ldots, s_k \frac{N}{r} \}$
+        \item Key argument: With high probability, the values obtained above will be relatively co-prime. Hence, their gcd must be $\frac{N}{r}$
+    \end{itemize}
+    \item \textbf{Case 2}: $r$ does not divide $N$
+    \begin{itemize}
+        \item Here, we have some A terms for $x$ corresponding to each distinct value of $f(x)$, where $A -1 < \frac{N}{r} < A + 1$
+        \item By measuring the second register, we end up with $\frac{1}{\sqrt{A}} \sum_{k=0}^{A-1} \ket{k r}$ on the first register
+        \item Applying QFT on the first register, we end up with the state
+        $\frac{1}{\sqrt{N A}}\sum_{l = 0}^N \sum_{k=0}^{A -1} \omega^{k r l} \ket{l}$ 
+        \item Probability to observer any $\ket{l}$ is given by $| \alpha_l |^2 = \frac{1}{N A} \frac{\sin^2 \pi r \delta m A/N}{ \sin^2 \pi r \delta m/ N}$
+        \item Key argument: With probability $\ge \frac{4}{\pi^2}$, the $l$ we observe will be close to an integer multiple of $\frac{N}{r}$, i.e. $|l - \frac{m N}{r}| < \frac{1}{2}$ where $m \in \{0, 1, \dots, r-1\}$. This bound can be expressed as  $|\frac{l}{N} - \frac{m }{r}| < \frac{1}{2 N} < \frac{1}{2 r^2}$ since $r \ll \sqrt{N}$
+        \item We use continued fractions expansion procedure to obtain $\frac{m}{r}$ in $O(\log n)$ steps
+        \item Repeating this quantum circuit and continued fractions expansion some k (= $\Theta(1)$) times, we get $\{\frac{m_1}{r}, \ldots, \frac{m_k}{r} \}$
+        \item With high probability, their gcd is $\frac{1}{r}$
+    \end{itemize}
+\end{itemize}
+
+
+Overall, with $\Theta(1)$ queries to $U_f$ and $O(\log N)$ classical post-processing overhead, we can find the $r$ using the quantum period finding algorithm
+
+\section{Lecture 11: Shor's algorithm}
+Shor's algorithm is a quantum algorithm for the factoring problem described below:
+\newline
+\textbf{Problem}: Let $N$ be an odd composite number. Find the prime factors $p$ and $q$ such that $N = p q$
+
+
+For some context, the best classical algorithm takes time that is in $\exp(O(\sqrt{n}))$ where $N = 2^n$. 
+
+\subsection{From factoring to period finding}
+To connect quantum period finding algorithm to integer factoring, we need to understand how factoring can be posed as a period finding problem. The first step is to connect non-trivial square roots for the number $N$ to factorization of $N$. 
+\newline 
+But what are non-trivial square roots of $1\pmod{N}$? We say that a number $x$ is a non-trivial square root of a number $N$ if $x^2 \equiv 1\pmod{N}$ where $x \ne \mp 1$. For instance, if we take $N = 15$, then $11$ is a non-trivial square root of $15$ as $11^2 = 121 = 1\pmod{15}$.  With that in place, we look at a result that connects non-trivial square roots of $1\pmod{N}$ to factors of $N$
+
+\begin{lemma}
+\label{thm:non-triv-sqr-root-lemma}
+If $x$ is a non-trivial square root of $1\pmod{N}$, then gcd($x\pm 1, N$) are non-trivial factors of $N$
+\end{lemma}
+\begin{proof}
+    By definition, $x \equiv \pm 1\pmod{N} \implies (x\pm 1) \not\equiv 0\pmod{N}$. Furthermore, $x^2 \equiv 1\pmod{N} \implies x^2-1 \equiv 0\pmod{N} \implies (x-1)(x+1) \equiv 0\pmod{N}$. So, $N$ divides $(x+1)(x-1)$ but not each term in the product. It follows that, $(x-1)$ and $(x+1)$ share a non-trivial factor of $N$. This implies that $gcd(x\pm 1, N)$ are the non-trivial factors.
+\end{proof}
+
+So, if we can devise a way to finding non-trivial square roots of $1\pmod{N}$, we can solve the factorization problem. One of the key ideas from Miller's work was to connect finding non-trivial square roots of $1\pmod{N}$ to period finding. This is key piece that helps extend quantum period finding to factorization.
+
+\subsubsection{Finding non-trivial square root of $1\pmod{N}$}
+\begin{itemize}
+    \item Pick an $x$ uniformly at random from the set $\{0, \dots, N-1\}$ such that $gcd(x, N) = 1$ i.e $x, N$ are relatively co-prime
+    \item Consider the sequence: $x^0\pmod{N}, x^1\pmod{N},\dots$. We find that this sequence will cycle after a while
+    \item The minimum value of r ($\ne 0$) such that $x^r \equiv 1\pmod{N}$ is the period of the sequence
+\end{itemize}
+
+\begin{tcolorbox}[sharp corners,title=Brief detour into $\mathbb{Z}^*_n$]
+$\mathbb{Z}^*_n$ represents a set of elements which form a multiplicative group of integers modulo $n$, i.e, $\mathbb{Z}^*_n$ consists of non-negative integers that are co-prime to $n$ ($\{0, 1, \dots, N-1\}$ which forms a \emph{group} under the operation multiplication $\pmod{n}$. Some interesting facts about this group includes:
+\begin{itemize}
+    \item The congruence class( or equivalence class) $1\pmod{n}$ forms the identity element of this group
+    \item Minimum non-zero value of $r$ such that $x^r \equiv 1\pmod{n}$ is known as the \emph{order} of $x$ in $\mathbb{Z}^*_n$
+\end{itemize}
+
+The above two points explains the cyclic nature of the sequence we $x^0\pmod{N}, x^1\pmod{N},\dots$. Thus finding order of $x$ in $\mathbb{Z}^*_n$  gives us the period of the sequence.\\
+
+Refer to Appendix 2 in \cite{nielsen2002quantum} for more group theory goodness.
+\end{tcolorbox}
+
+Let's understand how order of $x$ connects with modular exponentiation through an example: Let $N = 15$ and $x = 7$. 
+
+\begin{center}
+    \begin{tabular}{|c|c|}
+    \hline
+    $x$ & $x^r\pmod{N}$\\[0.5ex]
+    \hline
+    0 & 1 \\
+    1 & 7 \\
+    2 & 4 \\
+    3 & 13 \\
+    \hline\hline
+    4 & 1 \\
+    \hline
+    \end{tabular}
+\end{center}
+
+
+So, of order of $7$ $\mathbb{Z}^*_{15}$ is $4$. The following lemma connects the order of $x$ in $\mathbb{Z}^*_N$ to non-trivial squares root  $1\pmod{N}$
+
+\begin{lemma}
+Let $N$ be an odd composite number with atleast $2$ distinct prime factors and let $x$ be chosen uniformly at random between  $0$ and $N-1$. If $gcd(x, N) =1$ ($x, N$ are relatively co-prime), then with probability $\ge 1/2$, the period $r$ (which is also of $x \in \mathbb{Z}^*_N$ of $f(a) = x^a (mod N)$ is even and \emph{$x^{r/2}$ is a non-trivial square root of $1\pmod{N}$}
+\end{lemma} 
+\begin{proof}
+   For the proof of this lemma and generalized version, refer to theorems \emph{A4.6, A4.12} and \emph{A4.13} from Appendix-4 in \cite{nielsen2002quantum}
+\end{proof}
+
+
+To summarize, the reduction entails the following steps:
+\begin{itemize}
+    \item Pick an $x$ uniformly at random from the set $\{0, \dots, N-1\}$ such that $gcd(x, N) = 1$ i.e $x, N$ are relatively co-prime
+    \item Compute $f(a) = x^a\pmod{N}$ (We assume that we have a circuit to pefrom this computation)
+    \item Use quantum period finding algorithm to find the period of $f(a)$
+    \item If $r$ is the period of $f$ then using Lemma 2, we argue that with high probability ($\ge 1/2$) that r is even and $x^{r/2}$ is a non-trivial square root of $1\pmod{N}$
+    \item Using Lemma 1, we conclude that non-trivial factors of $N$ is given by $gcd(x^{r/2} \pm 1, N)$
+\end{itemize}
+
+\begin{tcolorbox}[sharp corners,title=Quick aside on function $f$]
+What should the domain and range of the function $f(a) = x^a\pmod{N}$ be?. Since we are implementing this function as a circuit, we can write $f$ as $f:\{0,1\}^b\rightarrow\{0,1\}^c$.
+\begin{itemize}
+    \item $c = \log_2N = n$ as the value of $f(a) \in \{0,1,\dots, N-1\}$
+    \item Let $b$ be equal to some $l$ with $L = 2^l$. 
+    \begin{itemize}
+        \item Insight into value of $l$ or $L$ comes when we consider the analysis of period finding when $r$ doesn't divide $L$
+        \item In such a case $A - 1 < \frac{L}{r} < A + 1$
+        \item We obtain the following inequality $|\frac{q}{L} - \frac{m}{r}| < \frac{1}{2L}$ where $q$ is our measurement outcome
+        \item We have $r \le N$ and want the upper bound on $|\frac{q}{L} - \frac{m}{r}|$ so small such that it's satisfied for any value of $r$, i.e, we want $|\frac{q}{L} - \frac{m}{r}| < \frac{1}{2N^2}$. This will help us find r via continued fractions expansion
+        \item Thus, $N^2 < L < 2N^2 \implies l = O(\log N^2)$
+    \end{itemize}
+\end{itemize}
+\end{tcolorbox}
+
+\subsection{Overall Algorithm}
+Shor's algorithm for integer factorization of $N$, an odd composite number, works as follows:
+\begin{itemize}
+    \item Pick an $x$ u.a.r from $0$ to $N-1$ such that $gcd(x, N) =1$
+    \item Pick some $L$ such that $N^2 < L < 2N^2$
+    \item Construct an unitary corresponding to the function $f:\{0, 1\}^l\rightarrow\{0,1\}^n$ such that $f(a) = x^a\pmod{N}$
+    \item Use quantum period finding algorithm to find period $r$ of $f$
+    \item If $r$ is odd, repeat quantum period finding algorithm
+    \item If $r$ is even, then compute $gcd(x^{r/2} \pm 1, N)$ to obtain factor of $N$
+\end{itemize}
+\subsection{Generalization}
+Consider $N$, an odd composite number such that  $N= p_1^{\alpha_1} p_2^{\alpha_2}\dots p_m^{\alpha_m}$ where $p_1, p_2, \dots, p_m$ are factors of $N$. In such case, the success probability of Lemma 2 is at least $1 - \frac{1}{2^m}$. This implies that factorization becomes more easier for numbers with many factors.
+
+To find the factors of $N$, we can use Shor's to find one of the non-trivial factors, say $p_i$ and run the algorithm on input $N/p_i$. We repeat this procedure $\log N$ times to obtain factors $N$
+
+\subsection{Complexity}
+Since Shor's algorithm does not rely on a black-box query function/unitary, complexity of the algorithm cannot be based on query complexity. Instead, we need to look at the circuit complexity for Shor's. This involves:
+\begin{itemize}
+    \item Hadamard gate counts: $O(\log N)$
+    \item Complexity of constructing $U_f$ which implements $f(a) = x^a\pmod{N}$: $C_{UF}$
+    \item Complexity of implementing $QFT_L$
+    \item Classical post-processing (GCD or continued-fractions-expansion): $O(\log L)$
+\end{itemize}
+
+Therefore, $C_{SHOR} = O(C_{PF} + \log N) = O(\log N + C_{UF} + C_{QFTL}$
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
+
