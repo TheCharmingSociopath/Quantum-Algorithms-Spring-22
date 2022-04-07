@@ -21,8 +21,10 @@ TA: [Aditya Morolia (Moi!)](https://thecharmingsociopath.github.io/)
 - [Lecture 6](../../raw/build/lecture_6.pdf)
 - [Lecture 7](../../raw/build/lecture_7.pdf)
 - [Lecture 8](../../raw/build/lecture_8.pdf)
+- [Lecture 9](../../raw/build/lecture_9.pdf)
 - [Lecture 10](../../raw/build/lecture_10.pdf)
 - [Lecture 11](../../raw/build/lecture_11.pdf)
+- [Lecture 20](../../raw/build/lecture_20.pdf)
 ## Instructions for students
 
 Make a PR with your scribe sources. Follow the following structure:
