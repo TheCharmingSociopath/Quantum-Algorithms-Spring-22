@@ -1,0 +1,265 @@
+\documentclass[11.5pt, paper=a4]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath, amssymb, amscd, amsthm, amsfonts, mathtools}
+\usepackage[left=2cm, right=2cm, top=1.5cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{physics}
+\usepackage{tikz}
+\usepackage{url}
+\usepackage[square,numbers]{natbib} \usepackage{tabularx}
+\usepackage{quantikz}
+
+\usepackage{braket}
+\usepackage{thmtools}
+\usepackage{float}
+\usepackage{mdframed}
+
+%%% Theorem Style
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{claim}{Claim}
+\newmdtheoremenv{boxthm}{Theorem}
+
+\numberwithin{theorem}{section}
+
+%% Autoref prefixes
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+\renewcommand{\figureautorefname}{Figure}
+\def\theoremautorefname{Theorem}
+\def\lemmaautorefname{Lemma}
+\def\definitionautorefname{Definition}
+\def\conjectureautorefname{Conjecture}
+\def\algorithmautorefname{Algorithm}
+
+%% Writing algorithms
+
+\usepackage{algorithm} % captioning 
+\usepackage{algpseudocode}
+
+% \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
+
+\title{Quantum Algorithms, Spring 2022: Lecture 20 Scribe}
+
+\author{Nithish Raja, Shodasakshari Vidya}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Recap}
+
+\noindent The grover iterate used in grover;s search is as follows
+\begin{equation*}
+    G = \begin{bmatrix}
+    \cos\theta & -\sin\theta\\
+    \sin\theta & -\cos\theta\\
+    \end{bmatrix} \tag{$\frac{\theta}{2} = \arcsin{\sqrt{\frac{M}{N}}}$}
+\end{equation*}
+
+\noindent Eigenvalues and eigenvectors of $G$ are the following
+\begin{equation*}
+\begin{split}
+    \ket{\lambda_{\pm}} & = e^{\pm i\theta}\\
+    \ket{\lambda_{\pm}} & = \frac{\ket{\omega}\pm i\ket{S_{\bar{\omega}}}}{\sqrt{2}}\\
+\end{split}
+\end{equation*}
+
+\noindent To get an estimate of $M$, we apply QPE with the grover iterate and estimate $\theta$. Using the estimated $\Tilde{\theta}$, we obtain an estimate $\Tilde{M} = N\sin^2\frac{\Tilde{\theta}}{2}$.\\ \\
+\noindent However, to use QPE, we require an eigenvector of $G$ or superposition of eigenvectors. Since $H^{\otimes n}\ket{0}^{\otimes n} = \ket{s} = \sqrt{\frac{N-M}{N}}\ket{S_{\bar{\omega}}} + \sqrt{\frac{M}{N}}\ket{\omega}$, we use that instead.\\ \\
+
+\noindent By setting QPE accuracy to $|\delta| = \frac{1}{\sqrt{N}}$, we can estimate $\Tilde{M} = M(1\pm O(\frac{1}{\sqrt{M}}))$.\\ \\
+
+\noindent Setting $t = \frac{n}{2} + \lceil\log(\frac{1}{\epsilon})\rceil$, we get a success probability $\ge 1 - \epsilon$. We can get a constant success probability in running time $O(\sqrt{N})$.
+
+\section{Optimality of quantum search}
+
+Consider a setting where only one solution ($\omega$) exists among $N$ and $\omega$ can be any of the $N$ possible values.\\
+Let two circuits be defined as follows
+\begin{equation*}
+    \ket{\psi^\omega_T} = U_TU_\omega U_{T-1}U_\omega\hdots U_1U_\omega\ket{s} \tag{$U_\omega = I - 2\ket{\omega}\bra{\omega}$}
+\end{equation*}
+\begin{equation*}
+    \ket{\psi_T} = U_TU_{T-1}\hdots U_1\ket{s} \tag{$\ket{s} = H^{\otimes n}\ket{0}^{\otimes n}$}
+\end{equation*}
+
+\noindent We call the first circuit as the 'oracular circuit' and the second one as the 'oracle oblivious circuit'. The 'oracle oblivious circuit' is the extreme case where $U_\omega$ is completely ignored.\\ \\
+Distance between output state of the two circuits is defined as follows
+\begin{equation*}
+    D_T = \sum_{\omega=0}^{N-1}\norm{\ket{\psi^\omega_T}-\ket{\psi_T}}^2
+\end{equation*}
+
+\begin{claim}
+After $T$ iterations, $D_T \le 4T^2$ i.e., after a few queries to $U_w$, $D_T$ does not change by much.
+\end{claim}
+\begin{proof}
+Proof by induction. Trivially,
+\begin{equation*}
+    T = 0 \implies D_T \le 0
+\end{equation*}
+$D_T \le 4T^2$ holds for case $T = 0$.\\ \\
+Assume $D_T \le 4T^2$ holds true.\\ \\
+Consider $D_{T+1}$,
+\begin{equation*}
+\begin{split}
+    D_{T+1} & = \sum_\omega\norm{\ket{\psi^\omega_{T+1}} - \ket{\psi_{T+1}}}^2\\
+    & = \sum_\omega\norm{U_{T+1}U_\omega\ket{\psi^\omega_T}-U_{T+1}\ket{\psi_T}}^2\\
+    & = \sum_\omega\norm{U_{T+1}(U_\omega\ket{\psi^\omega_T}-\ket{\psi_T})}^2\\
+\end{split}
+\end{equation*}
+
+\begin{equation*}
+\begin{split}
+    \norm{U(\ket{\psi}-\ket{\phi})}^2 & = [U(\ket{\psi}-\ket{\phi})(\ket{\psi}-\ket{\phi})^\dagger U^\dagger]^2\\
+    & = (\ket{\psi}-\ket{\phi})(\ket{\psi}-\ket{\phi})^\dagger\\
+\end{split}
+\end{equation*}
+
+\begin{equation*}
+\begin{split}
+    \therefore \sum_\omega\norm{U_{T+1}(U_\omega\ket{\psi^\omega_T}-\ket{\psi_T})}^2 & = \sum_\omega\norm{U_\omega\ket{\psi^\omega_T}-\ket{\psi_T}}^2\\
+    & = \sum_\omega\norm{U_\omega(\ket{\psi^\omega_T} - \ket{\psi_T}) + (U_\omega - I)\ket{\psi_T}}^2
+\end{split}
+\end{equation*}
+
+\begin{boxthm}[Cauchy schwarz inequality]
+\label{thm:cauchy_schwarz}
+\begin{equation*}
+    |\langle u,v\rangle|^2 \le \langle u,u\rangle.\langle v,v\rangle
+\end{equation*}
+\begin{equation*}
+    |\langle u,v\rangle| \le \norm{u}.\norm{v} \tag{$\norm{u} = \sqrt{\langle u,u \rangle}$}
+\end{equation*}
+\end{boxthm}
+
+\begin{equation*}
+    \therefore \norm{\ket{\psi^\omega_{T+1}}-\ket{\psi_{T+1}}}^2 \le \norm{\ket{\psi^\omega_T}-\ket{U_\omega-I}\ket{\psi_\omega}}^2 + \norm{(U_\omega - I)\ket{\psi_T}}^2 + 2\norm{\ket{\psi^\omega_T}-\ket{\psi_T}}\norm{(U_\omega-I)\ket{\psi_T}} \tag{Using cauchy schwarz}
+\end{equation*}
+
+W.k.t
+\begin{equation*}
+    \norm{(U_\omega)\ket{\psi_T}}^2 = \norm{-2\ket{\omega}\braket{\omega|\psi_T}}^2 = 4|\braket{\omega|\psi_T}|^2
+\end{equation*}
+\begin{equation*}
+\begin{split}
+    \therefore D_{T+1} & \le \sum_\omega\norm{\ket{\psi^\omega_T}-\ket{\omega_T}}^2 + 4\sum_\omega|\braket{\omega|\psi_T}|^2 + 4\sum_\omega\norm{\ket{\psi^\omega_T}-\ket{\psi_T}}.|\braket{\omega|\psi_T}|\\
+    & \le D_T + 4 + 4\sum_\omega\norm{\ket{\psi^\omega_T}-\ket{\psi_T}}.|\braket{\omega|\psi_T}|
+\end{split}
+\end{equation*}
+
+\begin{equation*}
+    \sum_\omega\norm{\ket{\psi^\omega_T}-\ket{\psi_T}}.|\braket{\omega|\psi_T}| \le (\sum_\omega\norm{\ket{\psi^\omega_T}-\ket{\psi_T}}^2)^\frac{1}{2}(\sum_\omega|\braket{\omega|\psi_T}|^2)^\frac{1}{2} = \sqrt{D_T} \tag{Using cauchy schwarz}
+\end{equation*}
+
+\begin{equation*}
+\begin{split}
+    \therefore D_{T+1} & \le D^2_T + 4 + 4\sqrt{D_T}\\
+    & \le 4T^2 + 8T + 4\\
+    & \le 4(T+1)^2\\
+\end{split}
+\end{equation*}
+
+\end{proof}
+
+\begin{lemma}
+\label{lemma:lemma1}
+For any quantum state $\ket{\phi}$ and computational basis state $\ket{\omega}$ s.t. $\omega \epsilon \{0,1\}^n$
+\begin{equation*}
+    \sum_\omega\norm{\ket{\phi}-\ket{\omega}}^2 \ge 2N - 2\sqrt{N}
+\end{equation*}
+\end{lemma}
+
+\begin{proof}
+\begin{equation*}
+\begin{split}
+    \sum_\omega\norm{\ket{\phi}-\ket{\omega}}^2 & = \sum_\omega(|\braket{\phi|\phi}| + |\braket{\omega|\omega}| - \braket{\phi|\omega} - \braket{\omega|\phi})\\
+    & = 2N - \sum_\omega\{\braket{\phi|\omega}+\braket{\omega|\phi}\}\\
+    & \ge 2N - 2\sum_\omega|\braket{\phi|\omega}|
+\end{split}
+\end{equation*}
+
+\begin{equation*}
+    \sum_\omega|\braket{\phi|\omega}|.1 \le \sqrt{\sum_\omega|\braket{\phi|\omega}|^2}\sqrt{\sum_\omega1^2} \le \sqrt{N} \tag{Using cauchy schwarz}
+\end{equation*}
+
+\begin{equation*}
+    \therefore \sum_\omega\norm{\ket{\phi}-\ket{\omega}}^2 \ge 2N - 2\sqrt{N}
+\end{equation*}
+\end{proof}
+
+\begin{claim}
+For algorithm using 'oracular circuit' to succeed w.p $\ge \frac{1}{2}$ ie., $|\braket{\omega|\psi^\omega_T}|^2 \ge \frac{1}{2} \forall \omega \epsilon \{0,1\}^n$ then $D_T = \Omega(N)$.
+\end{claim}
+\begin{proof}
+\begin{equation*}
+    D_T = \sum_\omega\norm{(\ket{\psi^\omega_T}-\ket{\omega})+(\ket{\omega}-\ket{\psi_T})}^2
+\end{equation*}
+\begin{equation*}
+    D_T \ge \sum_\omega\norm{\ket{\psi^\omega_T}-\ket{\omega}}^2 + \sum_\omega\norm{\ket{\omega}-\ket{\psi_T}}^2 -2\sum_\omega\norm{\ket{\psi^\omega_T}-\ket{\omega}}.\norm{\ket{\omega}-\ket{\psi_T}} \tag{$\norm{a+b} \ge \norm{a-b}$}
+\end{equation*}
+\begin{equation*}
+    \therefore D_T \ge (\sum_\omega\norm{\ket{\psi^\omega_T}-\ket{\omega}} - \sum_\omega\norm{\ket{\omega}-\ket{\psi_T}})^2
+\end{equation*}
+Using lemma \ref{lemma:lemma1}, we get
+\begin{equation}
+\label{eqn:claim2_1}
+    \sum_\omega\norm{\ket{\omega}-\ket{\psi_T}}^2 \ge 2N - 2\sqrt{N}
+\end{equation}
+\begin{equation}
+\label{eqn:claim2_2}
+    \sum_\omega\norm{\ket{\psi^\omega_T}-\ket{\omega}}^2 = \sum_\omega(2 - 2Re(\braket{\omega|\psi^\omega_T})) \le (2 - \sqrt{2})N
+\end{equation}
+
+Using \ref{eqn:claim2_1} and \ref{eqn:claim2_2}, we get
+\begin{equation*}
+\begin{split}
+    D_T & \ge [(2N-2\sqrt{N})^\frac{1}{2}-(2N-\sqrt{2}N)^\frac{1}{2}]^2\\
+    & \ge [N^\frac{1}{2}\{(2-2\frac{2}{\sqrt{N}})^\frac{1}{2}-(2-\sqrt{2})^\frac{1}{2}\}]^2\\
+    & \ge C.N\\
+    D_T & = \Omega(N)\\
+\end{split}
+\end{equation*}
+
+\end{proof}
+
+\section{Amplitude estimation}
+\noindent Goal is to increase the amplitude of certain states similar to what is done in "grover's search algorithm".
+
+\subsection{Classical equivalent:}
+
+\begin{claim}
+Let algorithm $A$ output the desired solution w.p $p(<<1)$. To observe the desired solution, the expected number of times to run algorithm $A$ is $\frac{1}{p}$.
+\end{claim}
+\begin{proof}
+\begin{equation*}
+    Pr[\text{atleast 1 success in $k$ trials}] = 1 - (1-p)^k
+\end{equation*}
+\begin{equation*}
+\begin{split}
+    (1-p)^k & = \sum_{l=0}^{k}(-1)^l{k\choose l}p^l = \sum_{l=0}^{k}\frac{(-1)^lk!}{(k-l)!l!}p^l\\
+    & = \sum_{l=0}^{k}(-1)^l\frac{(k-l+1)(k-l+2)\hdots k}{l!}p^l\\
+    & \le \sum_{l=0}^{k}(-1)^l\frac{k^l}{l!}p^l = e^{-pk}\\
+\end{split}
+\end{equation*}
+
+For $(1-p)^k \le e^{-pk} \le \epsilon$ to hold, $k \ge \frac{1}{p}\log(\frac{1}{\epsilon})$. Therefore, $1-(1-p)^k \ge 1-\epsilon \; \forall k \ge \frac{1}{p}\log(\frac{1}{\epsilon})$.
+\end{proof}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
+
