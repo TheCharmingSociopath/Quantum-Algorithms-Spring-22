@@ -1,0 +1,286 @@
+\documentclass[11.5pt, paper=a4]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath, amssymb, amscd, amsthm, amsfonts, mathtools}
+\usepackage[left=2cm, right=2cm, top=1.5cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{physics}
+\usepackage{tikz}
+\usepackage{url}
+\usepackage[square,numbers]{natbib} \usepackage{tabularx}
+\usepackage[version=4]{mhchem}
+\usepackage{tikz}
+\usetikzlibrary{quantikz}
+
+\usepackage[latin1]{inputenc} \usepackage{amsmath}
+
+\usepackage{amsfonts}
+
+\usepackage{mhchem} \RequirePackage{amsmath,amssymb,latexsym}
+
+\usepackage{braket}
+\usepackage{thmtools}
+\usepackage{float}
+
+%%% Theorem Style
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\numberwithin{theorem}{section}
+
+%% Autoref prefixes
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+\renewcommand{\figureautorefname}{Figure}
+\def\theoremautorefname{Theorem}
+\def\lemmaautorefname{Lemma}
+\def\definitionautorefname{Definition}
+\def\conjectureautorefname{Conjecture}
+\def\algorithmautorefname{Algorithm}
+
+%% Writing algorithms
+
+\usepackage{algorithm} % captioning 
+\usepackage{algpseudocode}
+
+% \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
+
+\title{Quantum Algorithms, Spring 2022: Lecture 12 Scribe}
+
+\author{Chandan Anand, Vishal Anand}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Recap}
+
+Shor's factoring Algorithm:\\
+
+\noindent \textbf{Factoring} - Let $N=P*Q$ be an odd composite number with $n$-bit binary representation with $P, Q \in \,$ prime number.
+
+\noindent \textbf{Algorithm}: The key idea of Shor's algorithm is to reduce the problem of factoring to that of period finding:
+\begin{itemize}
+\item $x \in \{0, 1, 2, ..., N-1\}$ such that $gcd(x,N)=1$.
+\item Let $L=2^l$ where $N^2 < L < 2N^2$
+\item A unitary corresponding to function $f$\\ $f:\{0,1\}^l \to \{0,1\} ; f(a)=x^a(mod N)$
+\item Use Quantum Period Finding (QPF) to find the period r of $f$
+\item If $r$ is odd, repeat QPF algorithm
+\item If $r$ is even, $gcd (x^{r/2} \pm 1, N)$ to obtain factors of N
+\end{itemize}
+    
+\noindent Complexity of Shor's Algorithm : Cost of QPF $(C_{PF}) + \mathcal{O}(\log{}N)$
+
+\noindent For $C_{PF}$ :-\\
+1) Cost of implementing $U_f$.\\
+2) Cost of implementing QFT.\\
+
+\section*{Quantum Circuit for Modular Exponentiation}
+
+\noindent We want a circuit for $f(a) = x^a (mod N)$ with $a \in \{0, 1, ... ,L-1\}$ and $N^2 < L < 2N^2$.\\
+We need $l$-bit binary string to represent $a$. So let $a = a_1 a_2 ... a_l$ be the binary representation of $a$ with $a_i \in \{0, 1\}$.
+This means that $a$ represents a number $a_1 2^{l-1} + a_2 2^{l-2} + ... + a_l 2^{0}$ in decimal number system. Thus we have,\\
+\begin{equation}
+\begin{split}
+    x^a (mod\,N) & = x^{a_1 a_2 ... a_l} (mod\,N) \\
+    & = x^{a_1 2^{l-1} + a_2 2^{l-2} + ... + a_l 2^{0}} (mod\,N) \\
+    & = x^{a_1 2^{l-1}} x^{a_2 2^{l-2}}  ...  x^{a_l 2^{0}} (mod\,N)
+\end{split}
+\end{equation}
+
+\noindent \textbf{Assumption}: We have a reversible circuit(and hence a Unitary) that implements multiplication modulo(N)
+\begin{equation}
+    \mathcal{U} \ket{y} = \ket{xy\:{mod\,N}}
+\end{equation}
+
+\textcolor{red}{Question}: What will be the cost of implementing modular multiplication of two $\mathcal{O}(log N)$-bit vectors?\\
+We will need $\mathcal{O}(log^2N)$ operations.
+By the above definition, we have:\\
+$\mathcal{U} \ket{1}= \ket{x (mod\,N)}$\\ 
+$\mathcal{U}^2 \ket{1}= \mathcal{U}(\mathcal{U} \ket{1}) = \mathcal{U} \ket{x (mod\,N)} = \ket{x*x (mod\,N)} = \ket{x^2 (mod\,N)}$\\
+By the repeated use of the above expression, we get:\\
+$\mathcal{U}^k \ket{1}= \ket{x^k (mod\,N)}$\\
+
+Now we realize that to get to $x^k$, we must apply $\mathcal{U}, k$ times. Since our goal is to find a fast factoring algorithm, we would like our circuit to work quickly.
+
+In place of the above technique we will use repeated squaring and multiplication: Basically, we want to implement $x^a (mod N)$. But once we do the decimal expansion of $a$ which was earlier written in binary form, we get factors of the form: $x^{2^k a_l} = {x^{2^k}}^{a_l}$. So now our goal is to implement $x^{2^k}$(this is not even powers of $x$). Notice,\\
+$\mathcal{U} \ket{1}= \ket{x (mod\,N)}$\\
+$\mathcal{U}^2 \ket{1} = \ket{x^2 (mod\,N)}$\\
+$(\mathcal{U}^2)^2 \ket{1} = (\mathcal{U}^2)(\mathcal{U}^2) \ket{1}= (\mathcal{U}^2) \ket{x^2 (mod\,N)} = \ket{(x^2)^2 (mod\,N)}$\\
+$((\mathcal{U}^2)^2)^2 \ket{1} = \ket{((x^2)^2)^2 (mod\,N)}$\\
+
+So to implement $\ket{x^{2^k} (mod\,N)}$, we can implement $(\mathcal{U}^2)^k \ket{1}$.\\
+$\ket{1} \xrightarrow{\mathcal{U}^2} \ket{x^2(mod\,N)} \xrightarrow{\mathcal{U}^2} \ket{x^4(mod\,N)} \xrightarrow{\mathcal{U}^2} ... \xrightarrow{\mathcal{U}^2} \ket{x^k(mod\,N)}$\\
+This means that we will need k iterations of ${\mathcal{U}^2}$ to implement $\ket{x^{2^k} (mod\,N)}$ where each of these iterations will cost: $\theta(log^2 N)$ operations.
+
+Also, since we are implementing ${\mathcal{U}^2}$ in sequence, so by the time we implement $U^{2^k}$, we would have already implemented $U^{2^j}$  $\forall j<k$.\\
+Now, to implement $U^{2^l}$, we need $\mathcal{O}(l) = \mathcal{O}(log L)$ iterations $\equiv \mathcal{O}(\log N)$. Thus the overall complexity of implementing $\ket{x^{2^k} (mod\,N)}$ is $\mathcal{O}(\log^3 N)$. The above steps gives us a procedure of implementing $\ket{x^{2^k} (mod\,N)}$, that is, $x$ to the power, powers of 2 $(mod\,N)$, but we actually want a circuit to implement $x^a (mod\,N)$.\\\\
+
+\section*{Circuit for implementing \begin{math}\mathcal{U}_f\end{math}}
+
+We will be implementing controlled unitaries of powers of 2($C-\mathcal{U}^{2^j}$) to implement $\mathcal{U_f}$.
+
+We have two registers, in the first of these we are placing the bits of $a$ and in the second register, we have $y$. We want to implement $\mathcal{U}_f$ which does the following:\\
+{$\ket{a_1 a_2 ... a_l}\ket{y} \xrightarrow{U_f} \ket{a_1 a_2 ... a_l}\ket{x^a y\:(mod\,N)}$}\\
+And if we set $y = 1$ in the above expression, we have our desired outcome:\\
+{$\ket{a_1 a_2 ... a_l}\ket{1} \xrightarrow{U_f} \ket{a_1 a_2 ... a_l}\ket{x^a\:(mod\,N)}$}\\
+
+Now let us see how do we achieve the above result. Recall, equation (1),
+\begin{equation}
+\begin{split}
+    x^a (mod\,N) & = x^{a_1 a_2 ... a_l} (mod\,N) \\
+    & = x^{a_1 2^{l-1} + a_2 2^{l-2} + ... + a_l 2^{0}} (mod\,N) \\
+    & = x^{a_1 2^{l-1}} x^{a_2 2^{l-2}}  ...  x^{a_l 2^{0}} (mod\,N)\\
+    & = {(x^{2^{l-1}})}^{a_1} {(x^{2^{l-2}})}^{a_2}  ...  {(x^{2^{0}})}^{a_l} (mod\,N)
+\end{split}
+\end{equation}
+
+In the previous section, we have seen how to implement each of these $x^{2^k}$ by applying corresponding Unitary, $\mathcal{U}^{2^k}$, and from the expression ${(x^{2^{k}})}^{a_i}$, we understand that these Unitaries are implemented in the 2nd register which are being controlled on the bit value of $a_i$ in the first register. So if we construct our circuit as follows:\\
+
+{$\ket{a_1 a_2 ... a_l}\ket{y} \xrightarrow{U_f} \ket{a_1 a_2 ... a_l} U^{2^{l-1}\, a_1} U^{2^{l-2}\, a_2} ... U^{2^{1}\, a_{l-1}} U^{2^{0}\, a_l} \ket{y}$}\\
+
+Thus,\
+\begin{equation}
+\begin{split}
+     \ket{a_1 a_2 ... a_l} U^{2^{l-1}\, a_1} U^{2^{l-2}\, a_2} ... U^{2^{1}\, a_{l-1}} U^{2^{0}\, a_l} \ket{y} & = \ket{a_1 a_2 ... a_l} U^{2^{l-1}\, a_1} U^{2^{l-2}\, a_2} ... U^{2^{1}\, a_{l-1}} \ket{{x^{2^0\, a_l}} y (mod N)}\\
+     & = \ket{a_1 a_2 ... a_l} U^{2^{l-1}\, a_1} U^{2^{l-2}\, a_2} ... U^{2^{2}\, a_{l-2}} \ket{{x^{2^1\, a_{l-1} + 2^0 x a_l}} y (mod N)}\\
+     & .\\
+     & .\\
+     & .\\
+     & = \ket{a_1 a_2 ... a_l} \ket{{x^{2^{l-1}\, a_1 + 2^{l-2}\, a_{2} + ... + 2^0\, a_l}} y\: (mod\, N)}\\
+     & = \ket{a_1 a_2 ... a_l}\ket{x^a y(mod\,N)}\\
+     & = \ket{a}\ket{x^a y(mod\,N)}
+\end{split}
+\end{equation}
+
+Now choosing $y = 1$, we get:\\ $\ket{a}\ket{1} \xrightarrow{U_f} \ket{a}\ket{x^a\: (mod\,N)}$\\
+Thus we find that above construction gives us the desired outcome.\\\\
+\textbf{Circuit Design}:\\\\
+\begin{quantikz}
+\lstick{$\ket{a_1}$}      & \qw    & \qw      & \qw        & \qw & \cdots && \qw      & \qw     & \ctrl{5}            & \qw                   & \qw \\
+\lstick{$\ket{a_2}$}      & \qw    & \qw      & \qw        & \qw & \cdots && \qw        &\ctrl{4} & \qw                 & \qw                   & \qw \\
+\lstick{\vdots\ \ }       & \vdots &          &            &     &        &&          &                     &                       & \vdots \\
+\lstick{$\ket{a_{l-1}}$}  & \qw    & \qw      & \ctrl{2}   & \qw & \cdots && \qw      & \qw                 & \qw                   & \qw \\
+\lstick{$\ket{a_{l}}$}    & \qw    & \ctrl{1} & \qw        & \qw & \cdots && \qw      & \qw                 & \qw                   & \qw \\
+\lstick{$\ket{1}$}        & \qw    & \gate{U} & \gate{U^2} & \qw & \cdots && \qw      & \gate{U^{2^{n-1}}}  & \gate{U^{2^{n-1}}}    & \qw \\
+\end{quantikz}
+\\
+Cost of implementing $U_f : \mathcal{O}({\log^3 N})$\\
+
+Recall for Quantum Period Finding(QPF), we had:\\
+
+QPF:-
+
+\begin{quantikz}
+\lstick{$\ket{0}$}      & \gate{H}    & \qw      & \qw        & \qw & \cdots && \qw      & \qw     & \ctrl{5}            & \qw                   & \qw \\
+\lstick{$\ket{0}$}      & \gate{H}    & \qw      & \qw        & \qw & \cdots && \qw        &\ctrl{4} & \qw                 & \qw                   & \qw \\
+\lstick{\vdots\ \ }       & \vdots &          &            &     &        &&          &                     &                       & \vdots \\
+\lstick{$\ket{0}$}  & \gate{H}    & \qw      & \ctrl{2}   & \qw & \cdots && \qw      & \qw                 & \qw                   & \qw \\
+\lstick{$\ket{0}$}    & \gate{H}    & \ctrl{1} & \qw        & \qw & \cdots && \qw      & \qw                 & \qw                   & \qw \\
+\lstick{$\ket{0}^{\otimes\, n}$}        & \gate{X^{\otimes \, n}}    & \gate{U^{2^0}} & \gate{U^{2^1}} & \qw & \cdots && \qw      & \gate{U^{2^{l-2}}}  & \gate{U^{2^{l-1}}}    & \qw \\
+\end{quantikz}
+\\
+
+$\gate{X^{\otimes \, n}}$ means that we apply Identity operator to first $n-1$ qubits and apply bit-flip to the last qubit.
+Complexity of Shor's Algorithm :\\ $\mathcal{O}({\log^3 N}) + C_{QFT}$\\\\
+
+\section*{Quantum Fourier Transform Circuit}
+\\
+$\ket{j} \xrightarrow{QFT_N} \frac{1}{\sqrt{N}} \sum_{k \in \{0,1\}^n} e^{\frac{i2\pi jk}{N}}\ket{k}$\\\\
+
+We want a circuit that implements the above transformation but first we will show that above transformation can be written in another way.\\\\
+
+\textbf{Notations for binary arithmetic}
+
+We have $j$ which a $n-bit$ binary string.
+\begin{equation}
+\begin{split}
+    j & = j_1 j_2 ... j_n \text{\hspace{4cm}(binary representation)}\\
+    & = j_1\,2^{n-1} + j_2\,2^{n-2} + ... + j_n\,2^{0} \text{\hspace{1cm}(decimal expansion)}
+\end{split}
+\end{equation}
+
+Then we have\
+$j/2 = j_1\,2^{n-2} + j_2\,2^{n-3} + ... + \frac{j_n}{2}$\\
+
+Substituting the above expression for $j/2$ in $e^{\frac{i2\pi j}{2}}$, we get:\\
+
+\begin{equation}
+e^{\frac{i2\pi j}{2}} & = e^{i2\pi j_{1}\, 2^{n-2}} e^{i2\pi j_2\, 2^{n-3}} e^{i2\pi j_3\, 2^{n-4}} ... e^{i2\pi j_{n-1}} e^{\frac{i2\pi j_n}{2}}
+\end{equation}
+
+In the above expression, each of the $j_i$'s are either 0 or 1, and we have $n$ terms with a factor of the form $2^{n-k}$ in the exponential. Since $k$ starts from 2, we eventually get to the situation where we have 2 in the denominator for the last term. Apart from this last term, for all others terms, we have even multiples of $\pi$ which gives 1. So,\\
+
+$e^{i2\pi j_1\,2^{n-2}} e^{i2\pi j_2\,2^{n-3}} e^{i2\pi j_3\,2^{n-4}} ... e^{i2\pi j_{n-1}} = 1$\\
+
+And the above expression reduces to:\\
+$e^{\frac{i2\pi j}{2}} = e^{\frac{i2\pi j_n}{2}} = e^{i2\pi 0.j_n}$ \\
+
+where $0.j_n$ is the binary representation of the number $j_n/2$ in decimal number system.\\
+
+Similarly,\\
+$\frac{j}{2^2} = j_1\,2^{n-3} + j_2\,2^{n-3} + ... + \frac{j_{n-1}}{2}+ \frac{j_n}{2^2}$\\
+
+Then,
+$e^{\frac{i2\pi j}{2^2}} = e^{i2\pi 0.j_{n-1} j_n}$\\
+
+$\vdots$
+
+And for the last term,\\
+$\frac{j}{2^n} = \frac{j_1}{2} + \frac{j_2}{2^2} + ... + \frac{j_{n-1}}{2^{n-1}} + \frac{j_n}{2^n}$\\
+
+We have,
+$e^{\frac{i2\pi j}{2^n}} = e^{i2\pi 0.j_1 j_2 \cdots j_n}$\\\\
+
+Now let's consider the expression for QFT:\\
+
+$\ket{j} \to \frac{1}{\sqrt{N}} \sum_{k \in \{0,1\}^n} e^{\frac{i2\pi jk}{N}} \ket{k}$\\\\
+
+Here $k$ represents a $n-bit$ binary string, and we are taking summation over all such binary string. We can write any particular binary representation of $k$ in decimal number system as follows:\\
+
+$k = \sum_{l=1}^{n} k_l 2^{n-l}$\\
+
+Then,\\
+
+$e^{\frac{i2\pi jk}{N}} = e^{{\frac{i2\pi j}{N}} \sum_{l=1}^{n} k_l\,2^{n-l}} = e^{{i2\pi j} \sum_{l=1}^{n} k_l 2^{-l}}$\\
+
+Since $\ket{k}$ is $n-bit$ binary string, we can represent a general ket $\ket{k}$ as follows:\\
+$\ket{k} = \ket{k_1} \otimes \ket{k_2} \otimes \cdots \otimes \ket{k_n}$\\
+
+where each of these $k_l$'s in the above expression can either be 0 or 1.\\
+
+Then,\\
+\begin{equation}
+\begin{split}
+e^{\frac{i2\pi jk}{N}} \ket{k} & = e^{{i2\pi j} \sum_{l=1}^{n} k_l 2^{-l}} \ket{k_1} \otimes \ket{k_2} \otimes \cdots \otimes \ket{k_n}\\
+& = e^{{i2\pi j}(k_1 2^{-1} + k_2 2^{-2} + ... + k_n 2^{-n})} \ket{k_1} \otimes \ket{k_2} \otimes \cdots \otimes \ket{k_n}\\
+& = e^{{i2\pi j}\frac{k_1}{2}} e^{{i2\pi j}\frac{k_2}{2^2}} \cdots e^{{i2\pi j}\frac{k_n}{2^n}} \ket{k_1} \otimes \ket{k_2} \otimes \cdots \otimes \ket{k_n}\\
+& = e^{{i2\pi j}\frac{k_1}{2}} \ket{k_1} \otimes e^{{i2\pi j}\frac{k_2}{2^2}} \ket{k_2} \otimes \cdots \otimes e^{{i2\pi j}\frac{k_n}{2^n}} \ket{k_n}
+\end{split}
+\end{equation}
+
+Then, 
+\begin{equation}
+\begin{split}
+    \frac{1}{\sqrt{N}} \sum_{k \in \{0,1\}^n} e^{\frac{i2\pi jk}{N}} \ket{k} & = \frac{1}{\sqrt{N}} \sum_{k_1 \in \{0,1\}} e^{{i2\pi j}\frac{k_1}{2}} \ket{k_1} \otimes \sum_{k_2 \in \{0,1\}}e^{{i2\pi j}\frac{k_2}{2^2}} \ket{k_2} \otimes \cdots \otimes \sum_{k_n \in \{0,1\}}e^{{i2\pi j}\frac{k_n}{2^n}} \ket{k_n}\\
+    & = \frac{1}{\sqrt{N}} \bigotimes_{l=1}^{n} \sum_{k_l=0}^{1} e^{i2\pi j\frac{k_l}{2^l}} \ket{k_l}\\
+    & = \frac{1}{\sqrt{N}} \bigotimes_{l=1}^{n} (\ket{0} + e^{\frac{i2\pi j}{2^l}} \ket{1})\\
+    & = \frac{1}{\sqrt{N}} \bigotimes_{l=1}^{n} (\ket{0} + e^{i2\pi 0.j_1j_2 \cdots j_l} \ket{1})
+\end{split}
+\end{equation}
+
+\end{enumerate}
+
+\end{document}
