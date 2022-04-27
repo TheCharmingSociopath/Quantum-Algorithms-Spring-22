@@ -1,0 +1,202 @@
+\documentclass[11.5pt, paper=a4]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath, amssymb, amscd, amsthm, amsfonts, mathtools}
+\usepackage[left=2cm, right=2cm, top=1.5cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{physics}
+\usepackage{tikz}
+\usetikzlibrary{quantikz}
+\usepackage{url}
+\usepackage[square,numbers]{natbib} \usepackage{tabularx}
+
+\usepackage{braket}
+\usepackage{thmtools}
+\usepackage{float}
+
+%%% Theorem Style
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\numberwithin{theorem}{section}
+
+%% Autoref prefixes
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+\renewcommand{\figureautorefname}{Figure}
+\def\theoremautorefname{Theorem}
+\def\lemmaautorefname{Lemma}
+\def\definitionautorefname{Definition}
+\def\conjectureautorefname{Conjecture}
+\def\algorithmautorefname{Algorithm}
+
+%% Writing algorithms
+
+\usepackage{algorithm} % captioning 
+\usepackage{algpseudocode}
+
+% \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
+
+\graphicspath{{./images/}}
+
+\title{Quantum Algorithms, Spring 2022: Lecture 15 Scribe}
+
+\author{Debanil Chowdhury, Rishabh Khanna}
+
+\date{March 10, 2022}
+
+\begin{document}
+
+\maketitle
+
+\section{Recap of previous lecture}
+    We finished the proof of the quantum phase estimation algorithm.
+    \begin{itemize}
+        \item QPE
+        \begin{enumerate}
+            \item Given a unitary $U$ with eigenstate $\ket{v}$ and eigenvalue $e^{i2\pi Q}$, there exists a quantum algorithm that outputs $\Tilde{Q}$ such that:
+                $$ |Q - \Tilde{Q} | < \epsilon\ with\ probability\ \le\ 1 - \delta $$
+            in time $O(\frac{T_{U}}{\delta\epsilon})$.
+            \item Highlights of Proof:\\
+                \begin{quantikz}
+                    \lstick{$\ket{0}^{\otimes t}$} & \gate{H^{\otimes t}} & \octrl{1} & \gate{QFT^{\dagger}} & \qw \\ 
+                    \lstick{$\ket{0}$} & \qw & \gate{U^{j}} & \qw & \qw & \ket{v} \\
+                \end{quantikz}
+                $$ \ket{0}^{\otimes t}\ket{v} \xrightarrow{QPE} \frac{1}{2^{t}}\sum_{k=0}^{2^{t}-1}\sum_{l=0}^{2^{t}-1}\exp{i2\pi k(Q-\frac{l}{2}t)} $$
+                \begin{itemize}
+                    \item $\Tilde{Q}=\frac{l}{T}$ is an estimate of the phase Q.
+                    \item Probablity to observe some $l$ such that $Q=\frac{l}{T} + \delta_{l}$ is:
+                        $$ | \gamma |^{2} = \frac{1}{T^{2}}\frac{sin^{2}(\pi T\delta_{l})}{sin^{2}(\pi\delta_{l})} $$
+                    \item \underline{Claim 1}
+                        \begin{enumerate}
+                            \item If Q has an exact 't' bit representation, i.e, for some l $Q=\frac{l}{T}$, then the probability to observe such an l=1.
+                            \item This is also true of Q has an exact 'd' bit representation, where $ d\le t$.
+                        \end{enumerate}
+                        
+                    \item \underline{Claim 2} \\
+                        With probability $\le \frac{1}{\pi^{2}}$, we measure some 'l' such that $\Tilde{Q}$ is the nearest 't'-bit approximation of Q, i.e,
+                        $$ Pr[l: 0 \le |\delta_{l}| \le \frac{1}{2T}] \ge \frac{1}{\pi^{2}} \equiv Pr[l: |\Tilde{Q}- Q| < \delta_{l}] \ge \frac{1}{\pi^{2}}, 0 \le |\delta_{l}|\le\frac{1}{2T}$$
+                        
+                    \item \underline{Claim 3} \\
+                    For some $\epsilon \in (0,1)$, the probablity that we measure some l such that $|\delta_{l}|\ge \epsilon$ is at most $\frac{1}{2\epsilon T}$, i.e,
+                    $$ PR[l: |\delta_{l}| \ge \epsilon] \le \frac{1}{2T\epsilon} $$
+                        \begin{itemize}
+                            \item By choosing $t=[log(\frac{1}{\epsilon})] + [log(\frac{1}{\delta})] + 1$, we have that
+                            $$ PR[|\Tilde{Q}-Q|] \ge 1-\delta \implies cost: O(\frac{T_{U}}{\delta\epsilon}) $$
+                            \item To obtain the best 'k' bit approximation of Q, we need $\epsilon =2^{-k}$ and $t=k + [log(\frac{1}{\delta})]$, in order to have: $PR[|\Tilde{Q}-Q|<\epsilon] \ge 1 - \delta$
+                        \end{itemize}
+                \end{itemize}
+        \end{enumerate}
+    \end{itemize}
+
+\section{Quantum linear systems}
+\begin{itemize}
+    \item Consider the solution to a linear system of equations $Ax=b$, where:
+    \begin{itemize}
+        \item $A \in \mathbb{R}^{N\cross N}$ (may also complex entries) is a non-singual matrix.
+        \item $b \in \mathbb{R}^{N\cross 1}$ is a coloumn vector.
+        \item Classically: \\
+        Output: $X=A^{-1}b$, where $x \in \mathbb{R}^{N\cross 1}$ is the solution to the linear systems.
+    \end{itemize}
+    \item Solving large linear systems has several applicatoins: optimization, machine learning,...
+\end{itemize}
+\underline{Classically:} Find an N-dimensional vector x such that: $X=A^{-1}b$.
+\begin{itemize}
+    \item If $A$ does not have fill rank, then we can implement the "Moore-Penrose pseudo inverse" $A^{\dagger}$ instead of $A^{-1}$, where:
+    $$ A^{\dagger} = (A^{\dagger}A)^{-1} A^{T}$$
+    This ensures that non-zero singular values of $A$ are inverted..
+    \item Often it suffices to output a final vector $\Tilde{X}$ that is close to x.
+\end{itemize}
+\begin{itemize}
+    \item[->] In the quantum realm, we are dealing with quantum states and not vectors.
+    \item[->] Quantum linear systems solver: It outputs an n-qubit quantum state $\ket{\Tilde{x}}$ that is close to the quantum state $\ket{X} = \frac{A^{-1}\ket{b}}{||A^{-1}\ket{b}||}$.
+\end{itemize}
+
+\section{QLSP}
+Find an n-qubit state $\ket{\Tilde{x}}$ such that $||\ket{x} - \ket{\Tilde{x}} || \le \epsilon$.
+\begin{itemize}
+    \item Classical Solution: $X=(X_{1}, X_{2}, X_{3},... X_{n})^{T}$\\
+    Quantum Solution: $\ket{\Tilde{x}}$ such that $|| \ket{\Tilde{x}} \ket{x} || \le \epsilon$, where
+    $$ \ket{X} = \frac{1}{||X||_{2}}\sum_{i=1}^{n}x_{i}\ket{i} $$
+    \item Just like QFT, the QLS algorithm "solves" the linear system of equations in a "weak sense": it outputs an n-qubit state whose amplitude vector (upto normalization) is the solution of the QLSP.
+    \item In some cases, this may be enough.
+\end{itemize}
+\underline{Assumptions:} 
+\begin{enumerate}
+    \item Assume that $\ket{b}$ is a quantum state that can be prepared by some unitary $U_{b}$, i.e:
+    $$ U_{b}\ket{0} = \ket{b},\ in\ time\ T_{U_{b}} $$
+    \item $A$ is well conditioned: Ratio of the largest and the smallest singular value of $A \le K_{a}$(conditional number of A).
+    \begin{itemize}
+        \item[->] It is easier to just assume that the smallest singular value is $\frac{1}{K_{A}}$ and the largest singular value is 1.
+        \item[->] In other words the eigenvalues of $A$ lie in
+        $$ D_{k}: \left[-1,\frac{-1}{K_{A}}\right]U\left[\frac{1}{K_{A}},1\right] $$
+    \end{itemize}
+\end{enumerate}
+\begin{itemize}
+    \item[->] Classical Solution: $X=A^{-1}b$\\
+    If $A=\sum_{j}\lambda_{j}v_{j}v_{j}^{T}$, then $A^{-1}$ implements the map:
+    $$ \lambda_{j} \rightarrow \frac{1}{\lambda_{j}} $$
+    If $b=\sum_{j}c_{j}v_{j}$, then $A^{-1}b=\sum_{j}\frac{c_{j}}{\lambda_{j}}v_{j} = X$
+    \item[->] Quantum Solution: $\ket{X} = \frac{\sum_{j}\frac{c_{j}}{\lambda_{j}}\ket{v_{j}}}{||X||}$
+\end{itemize}
+
+\section{HHL Algorithm}
+\begin{itemize}
+    \item We asssumed $A = A^{\dagger}$.\\
+    Given any non-hermitian $A$, by adding an ancilla qubit, we see\\
+    $$ \bar{A} = \ket{0}\bra{1} \otimes A + \ket{1}\bra{0} A^{\dagger} = \begin{pmatrix}0 & A \\A^{\dagger} & 0 \end{pmatrix}$$
+    \item $\bar{A}$ is hermitian.
+    \item Let svd of $A$ be:
+    $A =  \sum_{j}^{} \sigma_{j}\ket{u_{j}}\bra{v_{j}} $ where, $A \in \mathbb{C}^{M \cross N}$,
+    $$\ket{u_{j}} \in \mathbb{C}^{M \cross 1} and \bra{v_{j}} \in \mathbb{C}^{N \cross 1}, (M \leq N)$$
+\end{itemize}
+\underline{Claim:} $ \bar{A} = \begin{pmatrix}0 & A \\A^{\dagger} & 0 \end{pmatrix} $ has eigenvalues $ \pm \sigma_{1},  \pm \sigma_{2}, \pm \sigma_{3}, ... , \pm \sigma_{M}$ and the rest are all 0.\\
+$\bar{A} \in \mathbb{C}^{(M+N) \cross (N+N)}$\\
+$$ \bar{A} =  \ket{0}\bra{1} \otimes A + \ket{1}\bra{0} A^{\dagger} = \sum_{j=1}^{M}\sigma_{j}(\ket{0}\bra{1} \otimes \ket{u_{j}}\bra{v_{j}} + \ket{1}\bra{0} \otimes \ket{v_{j}}\bra{u_{j}})$$\\
+What is $ \bar{A} \ket{0} \ket{u_{j}} = \sigma_{j} \ket{1} \ket{v_{j}}$ and $ \bar{A} \ket{1} \ket{v_{j}} = \sigma_{j} \ket{0} \ket{u_{j}} $
+\begin{itemize}
+    \item Eigenstates of $\bar{A} : \ket{\Psi_{j}^{\pm}} = \frac{\ket{0} \ket{u_{j}} \pm \ket{1} \ket{v_{j}}}{\sqrt{2}}$
+    \item Spectral decomposition of $\bar{A} : \sum_{j=1}^{M}\sigma{j}(\ket{\Psi_{j}^{+}}\bra{\Psi_{j}^{+}} - \ket{\Psi_{j}^{-}}\bra{\Psi_{j}^{-}})$\\
+    Now let $ \ket{b} = \sum_{j=1}^{M}$. Then,\\
+    $ \ket{0}\ket{b} = \begin{pmatrix} \ket{b}\\ 0 \end{pmatrix} ; \bar{A}\ket{\bar{x}} = \ket{b}$\\
+    $$ \bar{A}^{-1}\ket{0}\ket{b} = \sum_{j=1}^{M}c_{j}\sigma{j}^{-1}(\ket{\Psi_{j}^{+}}\bra{\Psi_{j}^{+}} - \ket{\Psi_{j}^{-}}\bra{\Psi_{j}^{-}})\ket{0}\ket{u_{j}}$$\\Now,
+    $$\ket{0}\ket{u_{j}} = \frac{\ket{\Psi_{j}^{+}} + \ket{\Psi_{j}^{-}}}{\sqrt{2}}$$\\ Now,
+    $$ \bar{A}^{-1}\ket{0}\ket{b} = \sum_{j=1}^{M}c_{j}\sigma{j}^{-1}(\frac{\ket{\Psi_{j}^{+}} - \ket{\Psi_{j}^{-}}}{\sqrt{2}}) = \begin{pmatrix} 0 \\ A^{+}\ket{b} \end{pmatrix}$$\\
+    When A is not hermitian, we are solving $$\bar{A}\ket{\bar{x}} = \ket{b}$$\\$$\ket{\bar{x}} = \ket{1}\ket{x} and \ket{\bar{b}} = \ket{0}\ket{b}$$\\
+    $$\boxed{\bar{A}\ket{1}\ket{x} = \ket{0}\ket{b}}$$
+\end{itemize}
+\section{Quantum Access to A}
+\begin{itemize}
+    \item Given access to A (hermitian), we can use quantum simulation algorithms to obtain $ \mu = e^{i2\pi A}$.
+    \item How to access A? 
+    $$Let\;\; V_{A} = \begin{pmatrix}\frac{A}{\alpha} & \star\\ \star & \star \end{pmatrix}$$ A is stored in top left block of unitary $V_{A}$\\
+    $$V_{A} = \ket{0}\bra{0}\otimes\frac{A}{\alpha} + ......$$\\
+    $$(\bra{0}\otimes1)V_{A}(\ket{0}\otimes1)$$\\
+    $V_{A}$ is a block encoding of A.\\
+    Let A be $\mathbb{R}^{2^{S}\cross2^{S}}$ and $V_{A}$ be a (s+a)-qubit unitary. Then $V_{A}$ is an ($\alpha$ ,a) block encoding of A if 
+    $$(\bra{0}^{\otimes a} \otimes1)V_{A}(\ket{0}^{\otimes a} \otimes1) =\frac{A}{\alpha}$$
+    \item We implemented $\frac{A}{\alpha}$ which is a linear map but not unitary.
+    \item This tells us we can implement linear maps in some subspace, while preserving the unitarity of overall operation.\\
+    $$
+    \begin{quantikz}
+    \lstick{$\ket{0}^{\otimes a}$} & \gate[wires=2]{V_{A}} & \meter{}\\
+    \lstick{$\ket{\Psi}$} & \qw & \qw  \rstick{$\frac{\frac{A}{\alpha}\ket{\Psi}}{\begin{Vmatrix}\frac{A}{\alpha}\ket{\Psi}\end{Vmatrix}}$\text{ upon measuring }$0^{a}$}
+    \end{quantikz}
+    $$
+    \item \underline{Block encoding of A}\\
+    $$V_{A}\ket{0}^{\otimes a}\ket{\Psi} = \ket{0}\frac{A \ket{\Psi}}{\alpha} + \ket{\Phi}^{1}$$\\
+    $$\frac{A}{\alpha} = (\bra{0}^{\otimes a} \otimes 1_{2^{S}})V_{A}(\ket{0}^{\otimes a} \otimes 1_{2^{S}})$$
+    \item If A is a sparse matrix (each row and column of A has atmost d non zero entries), then $\exists V_{A}$ such that $\alpha$ = d.
+    \item $ \mu = e^{i2\pi A}$
+\end{itemize}
+\end{document}
