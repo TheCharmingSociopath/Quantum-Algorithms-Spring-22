@@ -1,0 +1,329 @@
+\documentclass[11.5pt, paper=a4]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{tikz}
+\usetikzlibrary{quantikz}
+\usepackage{amsmath, amssymb, amscd, amsthm, amsfonts, mathtools}
+\usepackage[left=2cm, right=2cm, top=1.5cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{physics}
+\usepackage{tikz}
+\usepackage{url}
+\usepackage[square,numbers]{natbib}
+\usepackage{tabularx}
+
+\usepackage{braket}
+\usepackage{thmtools}
+\usepackage{float}
+
+%%% Theorem Style
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\numberwithin{theorem}{section}
+
+%% Autoref prefixes
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+\renewcommand{\figureautorefname}{Figure}
+\def\theoremautorefname{Theorem}
+\def\lemmaautorefname{Lemma}
+\def\definitionautorefname{Definition}
+\def\conjectureautorefname{Conjecture}
+\def\algorithmautorefname{Algorithm}
+
+%% Writing algorithms
+\setlength{\parindent}{0mm}
+\usepackage{algorithm} % captioning 
+\usepackage{algpseudocode}
+
+% \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
+
+\graphicspath{{./Lecture_X/images/}}
+
+\title{Quantum Algorithms, Spring 2022: Lecture 19 Scribe}
+
+\author{Shreyas Pradhan, Pahulpreet Singh}
+
+\date{March 25, 2022}
+
+\begin{document}
+
+\maketitle
+
+\section{Recap}
+
+\subsection{Grover's Quantum Search Algorithm}
+
+\subsubsection*{Aim}
+Given a black box $U_f$ for the Boolean function $f \rightarrow \{ 0,1 \} $, where $X = \{ x_1, x_2, ..., x_N \}$, how many queries to $U_f$ are needed to find $x^* \in X$, such that $f(x^*) = 1$.
+
+\vspace{5mm}
+$M (<< N)$ is the number of elements in $X$ such that $f(x) = 1$.
+
+\subsubsection*{Quantum Algorithm}
+
+\begin{center}
+\begin{quantikz}
+\lstick{$\ket 0 ^ {\otimes n}$} & \gate[wires=1]{H^{\otimes n}} & \gate{U_f^{\pm}} & \gate{D} & \qw\ \ldots\ & \gate{U_f^{\pm}} & \gate{D} & \meter{} & \cw
+\end{quantikz}
+\end{center}
+
+We define the states that are marked as 
+\begin{equation}
+|w \rangle = \dfrac{1}{\sqrt{M}} \sum_{\{x: f(x) = 1 \}} |x \rangle
+\end{equation}
+and the states that are not marked as
+\begin{equation}
+|s_{\bar{w}} \rangle = \dfrac{1}{\sqrt{N - M}} \sum_{\{x: f(x) = 0 \}} |x \rangle
+\end{equation}
+Hence we can write out initial state as
+\begin{equation}
+|s \rangle = \cos{(\dfrac{\theta}{2})} |s_{\bar{w}} \rangle + \sin{(\dfrac{\theta}{2})} |w \rangle
+\end{equation}
+where $\sin{(\dfrac{\theta}{2})} = \sqrt{\dfrac{M}{N}}$.
+
+\vspace{5mm}
+
+Now we define $G = D U_f^{\pm}$, where
+\begin{equation}
+U_f : I - 2|w\rangle \langle w| = - R_w
+\end{equation}
+is the oracle that implements the marking function (reflection about |$s_{\bar{w}}\rangle$)
+\begin{equation}
+D : 2|s\rangle \langle s| - I = R_s
+\end{equation}
+and D is the diffuser (reflection about |$s \rangle$). \\
+Hence $G = - R_s R_w$ is the operation we need to apply multiple times.
+
+\vspace{5mm}
+
+In the 2-D subspace spanned by $\{ |s_{\bar{w}} \rangle, |w \rangle \}$,
+\begin{equation}
+G = \begin{pmatrix}
+\cos{\theta} & -\sin{\theta} \\
+\sin{\theta} & \cos{\theta}
+\end{pmatrix}
+\end{equation}
+(as the product of two reflections $\equiv$ Rotation by $\theta$)
+
+\vspace{5mm}
+
+We proved that for $K = \dfrac{\pi}{4}\sqrt{\dfrac{N}{M}} - \dfrac{1}{2}$, 
+\begin{equation}
+G^K |s \rangle = | w \rangle
+\end{equation}
+
+\section{What if we don't know $M$?}
+\subsection{Guessing $M$}
+\begin{itemize}
+\item Run Grover's algorithm for different guesses of $M (= 1, 2, 4, ..., 2^{\log_2N})$
+
+\item If $M'$ is the actual number of solutions, $\exists$ a guess $M: \dfrac{M'}{2} \leq M \leq 2M'$
+
+\item For this guess, the success probability is a constant
+
+\item Expected number of queries to $U_f^{\pm}: O(\sqrt{N})$
+\end{itemize}
+
+\subsection{Quantum Counting}
+In the case that we do not know what $M$ is, we can estimate $M$ using Quantum Phase Estimation applied on $G$.
+
+\vspace{5mm}
+
+In the 2D invariant space,
+
+\begin{equation}
+    G = \begin{pmatrix}
+    \cos{\theta} & -\sin{\theta} \\
+    \sin{\theta} & \cos{\theta}
+    \end{pmatrix}
+\end{equation}
+where $\dfrac{\theta}{2} = \sin^{-1}(\sqrt{\dfrac{M}{N}})$
+
+
+Eigenvalues and eigenvectors of $G$ are $\lambda_{\pm} = e^{\pm i \theta}$, $\ket{\lambda_{\pm}} = \dfrac{\ket{w} \pm i \ket{s_{\bar{w}}}}{\sqrt{2}}$
+
+\subsubsection{Quantum Phase Estimation}
+
+\textbf{Aim} \\
+Given $U$ with eigenvalue $e^{i2 \pi \phi}$ and eigenstate $\ket{u}$ obtain $\tilde{\phi}$ such that $|\tilde{\phi} - \phi| \leq \delta$ with $p_{succ} \geq 1 - \epsilon$
+
+
+\textbf{Time Complexity}: $O(\dfrac{T_u}{\delta \epsilon})$
+
+\vspace{5mm}
+
+Eigenvalues of G are
+\begin{equation*}
+    \lambda_{+} = e^{i \theta} = e^{i 2\pi (\frac{\theta}{2 \pi})}
+\end{equation*}
+\begin{equation*}
+    \lambda_{-} = e^{-i \theta} = e^{i 2\pi (1 - \frac{\theta}{2 \pi})}
+\end{equation*}
+In our case, we need to find $\lambda_{\pm}$ to find $\theta$. However there is no way beforehand to prepare $\ket{\lambda_{\pm}}$.
+
+\vspace{5mm}
+
+\textbf{Idea} \\
+To prepare state $\ket{s} = \cos(\frac{\theta}{2})\ket{s_{\bar{w}}} + \sin(\frac{\theta}{2})\ket{w}$
+
+\vspace{5mm}
+
+We can rewrite $\ket{s}$ in terms of $\ket{\lambda_{\pm}}$. 
+\begin{equation*}
+    |\langle \lambda_{\pm} | s \rangle|^2 = \frac{1}{2}
+\end{equation*}
+So, 
+\begin{equation*}
+ \ket{s} = \dfrac{e^{i \theta}}{\sqrt{2}} \ket{\lambda_+} - \dfrac{e^{-i \theta}}{\sqrt{2}} \ket{\lambda_-}   
+\end{equation*}
+
+We will now apply Quantum Phase Estimation with $G$ and $\ket{s}$
+\begin{equation}
+    \ket{0}^{\otimes t}\ket{s} \rightarrow  \dfrac{e^{i \theta}}{\sqrt{2}} \ket{\tilde{\theta_{+}}}\ket{\lambda_+} - \dfrac{e^{-i \theta}}{\sqrt{2}} \ket{\tilde{\theta_{-}}}\ket{\lambda_-}
+\end{equation}
+
+\textbf{Quantum Circuit for QPE}
+\begin{center}
+\begin{quantikz}
+\lstick{$\ket 0 ^ {\otimes t}$} &[2mm] \gate[wires=1]{H^{\otimes t}} \qwbundle
+{t} & \ctrl{1} & \gate{\text{QFT}^\dagger} & \meter{} \\ 
+\lstick{$\ket 0 ^ {\otimes n}$} &[2mm] \gate[wires=1]{H^{\otimes n}} \qwbundle
+{n} & \gate{G^{2^{t-1}}} & \qw & \qw
+\end{quantikz}
+\end{center}
+
+We obtain some $\tilde{\theta}$ such that $|\tilde{\theta} - \theta| \leq \delta$ with probability $\geq 1 - \epsilon$. Here the total qubits used was $t = d + \lceil \log(\frac{1}{\epsilon}) \rceil$ and $\delta = 2^{-d}$.
+
+\vspace{5mm}
+Since, our state $\ket{s}$ was a superposition of $\ket{\lambda_+}$ and $\ket{\lambda_+}$, we can obtain either $\theta$ or $-\theta$ after QPE.
+However, it does not matter which we obtain as for a good estimate of $M (<< N)$ we need
+\begin{equation}
+    \sin^2(\frac{\theta}{2}) = \frac{M}{N} \implies M = N \sin^2(\frac{\theta}{2})
+\end{equation}
+From QPE, we would estimate: $\tilde{M} = N \sin^2(\frac{\tilde{\theta}}{2})$
+
+\subsubsection{Precision of estimated $\tilde{M}$}
+\begin{equation}
+    |\tilde{M} - M| = N |\sin^2(\frac{\tilde{\theta}}{2}) - \sin^2(\frac{\theta}{2})| \leq N |\sin(\frac{\tilde{\theta}}{2}) + \sin(\frac{\theta}{2})||\sin(\frac{\tilde{\theta}}{2}) - \sin(\frac{\theta}{2})|
+\end{equation}
+
+\textbf{Mean Value Theorem}
+\begin{equation}
+    \dfrac{|f(\theta_1) - f(\theta_2)|}{|\theta_1 - \theta_2|} = |f'(e)|
+\end{equation}
+for some $e \in [\theta_1, \theta_2]$
+
+\vspace{5mm}
+Hence, by MVT
+\begin{equation}
+    |\sin(\frac{\tilde{\theta}}{2}) - \sin(\frac{\theta}{2})| \leq \frac{1}{2}|\tilde{\theta} - \theta|
+\end{equation}
+
+Now,
+\begin{align*}
+    |\sin(\frac{\tilde{\theta}}{2}) + \sin(\frac{\theta}{2})| &\leq |\sin(\frac{\tilde{\theta}}{2})| + |\sin(\frac{\theta}{2})| \\
+    &\leq |\sin(\frac{\theta + \delta}{2})| + |\sin(\frac{\theta}{2})| \\
+    &\leq |\sin(\frac{\theta}{2})\cos(\frac{\delta}{2}) + \cos(\frac{\theta}{2})\sin(\frac{\delta}{2})| + |\sin(\frac{\theta}{2})|\\
+    &\leq |\sin(\frac{\theta}{2})\cos(\frac{\delta}{2})| + |\cos(\frac{\theta}{2})\sin(\frac{\delta}{2})| + |\sin(\frac{\theta}{2})|\\
+    &\leq 2 \sin(\frac{\theta}{2}) + |\frac{\delta}{2}|
+\end{align*}
+
+\begin{align*}
+    \therefore |\tilde{M} - M| &\leq (2 \sin(\frac{\theta}{2}) + |\frac{\delta}{2}|) |\tilde{\theta} - \theta| \frac{N}{2} \\
+    &\leq N (2 \sin(\frac{\theta}{2}) + |\frac{\delta}{2}|) \frac{|\delta|}{2} \\
+    &\leq N (2 \frac{M}{N} + |\frac{\delta}{2}|) \frac{|\delta|}{2} \\
+    &= \sqrt{MN} |\delta| + \frac{N|\delta|^2}{4}
+\end{align*}
+
+If we choose $|\delta| = \frac{1}{\sqrt{N}}$, then
+\begin{equation}
+    |\tilde{M} - M| \leq \sqrt{M} + \frac{1}{4}
+\end{equation}
+
+Hence, we can estimate $M$ to a constant multiplicative precision
+\begin{equation}
+    \tilde{M} = M (1 \pm O(\frac{1}{\sqrt{M}}))
+\end{equation}
+which is good enough to obtain a constant success probability for Grover's Algorithm. 
+
+Precision of QPE: $\delta = \frac{1}{\sqrt{N}}$
+\begin{equation*}
+\delta = 2^{-d} \implies d = \frac{n}{2}   \ \text{qubits}
+\end{equation*}
+
+
+Hence, if we demand $p_{succ} \geq 1 - \epsilon \implies t = \frac{n}{2} + \lceil \log(\frac{1}{\epsilon}) \rceil$
+
+\textbf{Query Complexity}: $O(\sqrt{N})$ which is advantageous.
+
+\vspace{5mm}
+Quantum counting also allows us to determine if $M=0$ (when $|\tilde{M}| < \frac{1}{4}$).
+
+\section{Optimality of Quantum Search}
+
+Grover's algorithm provides an optimal separation in query complexity for the quantum search problem.
+
+\vspace{5mm}
+Consider that there is one solution $w$.
+
+The setting should be such that we are able to distinguish between any of the $N$ possible values of $w$  after measurement.
+
+\vspace{5mm}
+Let us consider a quantum circuit with $T$ queries:
+
+\begin{equation}
+    \ket{\psi_{T}^{w}} = U_{T}U_{w}U_{T-1}U_{w} ... U_{1}U_{w} \ket{s} = U{w, T} \ket{s}
+\end{equation}
+where $U_{w} = 1 - 2\ket{w}\bra{w}$
+
+\vspace{5mm}
+Now consider another quantum circuit that does not use $U_w$ but only uses $U_j$'s $T$ times. Applying this circuit to $\ket{s}$ we have:
+
+\begin{equation}
+    \ket{\psi_{T}} = U_{T}U_{T-1} ... U_{1} \ket{s}
+\end{equation}
+
+$U(w, T)$ interleaves $U_w$ and $U_j$'s just like Grover's algorithm. The `oracle oblivious' circuit is the extreme case, where we completely ignore the oracle.
+
+\subsection*{Strategy}
+
+We will bound the distance between $\ket{\psi_{T}^{w}}$ and $\ket{\psi_T}$. Any $\ket{w}$ can be a solution.
+
+\vspace{5mm}
+After the $T^{th}$ iteration, the distance between them:
+\begin{equation}
+    || \ket{\psi_{T}^{w}} - \ket{\psi_{T}} ||^2
+\end{equation}
+
+Since we want to consider all possible $\ket{w}$'s, we want to bound:
+\begin{equation}
+    D_T = \sum_{w \in \{0,1\}^n} || \ket{\psi_{T}^{w}} - \ket{\psi_{T}} ||^2
+\end{equation}
+    
+We will prove an upper bound and a lower bound on $D_T$.
+
+\subsection*{Claims}
+
+\begin{enumerate}
+    \item After $T$ iterations, $D_T \leq 4T^2$
+    \item If the algorithm has to succeed with $p \geq \frac{1}{2}$ ,ie, $|\langle w \ket{\psi_{T}^{w}}| \geq \frac{1}{2}$ for any $w \in \{0,1\}^n$ that is marked, then $D_T = \Omega(N)$
+\end{enumerate}
+
+Claims 1 and 2 together imply that $T \geq c \sqrt{N}$ for the algorithm to succeed with a high probability.
+
+% \bibliographystyle{plainnat}
+% \bibliography{references}
+
+\end{document}
